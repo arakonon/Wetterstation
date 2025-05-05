@@ -12,7 +12,7 @@ bme680.sea_level_pressure = 1013.25
 # Normalerweise müssen Sie einen Offset hinzufügen, um die Temperatur des Sensors zu berücksichtigen.
 # Dieser Wert liegt in der Regel bei etwa 5 Grad, variiert aber je nach Verwendung.
 # Verwenden Sie einen separaten Temperatursensor zur Kalibrierung dieses Sensors.
-temperature_offset = -5
+temperature_offset = -1
 while True:
 	print("\nTemperatur: %0.1f C" % (bme680.temperature + temperature_offset))
 	print("Gas: %d ohm" % bme680.gas)
