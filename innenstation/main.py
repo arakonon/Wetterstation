@@ -1,24 +1,22 @@
 from lcd_control import display_text
 from lcd_control import display_smiley
-from  dht22 import  DHT22Reader
+from  BME680 import BME680Sensor
 import time
 
-sensor = DHT22Reader()
-while True:
-    temperature_c, humidity = sensor.read()
-    if temperature_c is not None and humidity is not None:
-        line1 = f"Temp: {temperature_c:.1f}°C"
-        line2 = f"Humid: {humidity:.1f}%"
-    else:
-        line1, line2 = "Fehler beim", "Lesen"
+bme = BME680Sensor()
 
-    # Ausgabe auf dem LCD
-    display_text(line1, line2)
-    # Optional: Smiley anzeigen
-    # display_smiley()
+def main():
+    while True:
 
-    time.sleep(2.0)
+        # Ausgabe auf dem LCD
+        display_text(f"temp: {bme.read_temperature():.1f}C", f"hum: {bme.read_humidity():.1f}%")
+        # Optional: Smiley anzeigen
+        # display_smiley()
 
+        time.sleep(2.0)
+
+if __name__ == "__main__":
+    main()
 
 
 #display_text("Wetter:", "23.5C, 60%")
