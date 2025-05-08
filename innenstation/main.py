@@ -1,17 +1,18 @@
 from lcd_control import display_text
 from lcd_control import display_smiley
 from  BME680 import BME680Sensor
+from Buzzer import Buzzer
 import time
 
 bme = BME680Sensor()
+buzzer = Buzzer()
 
 def main():
     while True:
 
         # Ausgabe auf dem LCD
         display_text(f"temp: {bme.read_temperature():.1f}C", f"hum: {bme.read_humidity():.1f}%")
-        # Optional: Smiley anzeigen
-        # display_smiley()
+        buzzer.soundsek(500, 10)
 
         time.sleep(2.0)
 
