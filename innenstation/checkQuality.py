@@ -12,9 +12,9 @@ class checkQuality:
         co2, acc  = self.bme.read_co2()
         hum = self.bme.read_humidity()
 
-        #print(f"[update_values] IAQ {self.iaq:.1f} (Acc {self.acc})")
-        #print(f"[update_values] CO₂ {self.co2:.1f} (Acc {self.acc})")
-        #print(f"[update_values] Hum {self.hum:.1f}")
+        print(f"[update_values] IAQ {self.iaq:.1f} (Acc {self.acc})")
+        print(f"[update_values] CO₂ {self.co2:.1f} (Acc {self.acc})")
+        print(f"[update_values] Hum {self.hum:.1f}")
 
 
 
