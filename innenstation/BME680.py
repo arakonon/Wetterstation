@@ -62,7 +62,7 @@ class BME680:
     # ----------------------------------------------------------------
     def _update(self):
         """Holt neue Daten, falls Sampling‑Intervall abgelaufen."""
-        if time.time() - self._last_t < 2.8 and self._last:
+        if time.time() - self._last_t < 3.5 and self._last:
             return  # noch aktuell
 
         t0 = time.time()
@@ -110,16 +110,30 @@ class BME680:
         iaq, acc = self.read_iaq()
         if acc < 2:
             mins = int((time.time() - self._start_t) // 60)
-            return f"Kalibrierung läuft seit {mins:02d} min"
+            return f"Kalibrierung seit: {mins:02d} Minuten"
         return f"{iaq:.1f} (Acc {acc})"
 
     def co2_str(self):
         co2, acc = self.read_co2()
         if acc < 2:
             mins = int((time.time() - self._start_t) // 60)
-            return f"Kalibrierung läuft seit {mins:02d} min"
+            return f"Kalibrierung seit: {mins:02d} Minuten"
         return f"{int(co2)} ppm (Acc {acc})"
+    
+    #---- Convenience‑Strings für LCD -------------------------------
+    def iaq_str_LCD(self):
+        iaq, acc = self.read_iaq()
+        if acc < 2:
+            mins = int((time.time() - self._start_t) // 60)
+            return f"I{mins:02d}m"
+        return f"IAQ:{int(iaq)}"
 
+    def co2_str_LCD(self):
+        co2, acc = self.read_co2()
+        if acc < 2:
+            mins = int((time.time() - self._start_t) // 60)
+            return f"C{mins:02d}m Calib."
+        return f"{int(co2)}ppm"
     # ----------------------------------------------------------------
     def save_state(self):
         """Schreibt den State nur, wenn Accuracy == 3."""

@@ -11,29 +11,47 @@ class Ampel:
         self.running = False  # Flag, um den Thread zu stoppen?
 
     def start(self):
-        """Starte die LED-Ampel (Rot, Gelb, Grün)."""
         self.running = True
+
+        while self.running and self.alarm.check_acc():   # acc < 2  → True
+            self._set_leds([0, 0, 0])   
+            sleep(2)                     # 2-s-Takt während Kalibrierung
+
+        if not self.running:             # wurde zwischendurch gestoppt?
+            return
+        print("[Ampel] Kalibrierung abgeschlossen.")
+
         while self.running:
-            self.alarm.update_values()  # Sensorwerte aktualisieren
+            self.alarm.update_values()
 
-            iaq_status  = self.alarm.check_IAQ_quality()
-            co2_status  = self.alarm.check_CO2_quality()
-            hum_status  = self.alarm.check_humidity_quality()
+            iaq = self.alarm.check_IAQ_quality()
+            co2 = self.alarm.check_CO2_quality()
+            hum = self.alarm.check_humidity_quality()
 
-            # Gesamtergebnis (Rot dominiert vor Gelb vor Grün)
-            if   0 in (iaq_status, co2_status, hum_status):
-                self._set_leds([1, 0, 0])   # Rot
-            elif 1 in (iaq_status, co2_status, hum_status):
-                self._set_leds([0, 1, 0])   # Gelb
+            if iaq == 0 or co2 == 0 or hum == 0:
+                self._set_leds([0, 1, 0])    # Rot
+            elif iaq == 1 or co2 == 1 or hum == 1:
+                self._set_leds([0, 0, 1])    # Gelb
             else:
-                self._set_leds([0, 0, 1])   # Grün
+                self._set_leds([1, 0, 0])    # Grün
 
-            sleep(1)   # 1-s-Takt; bei Bedarf anpassen
+            sleep(2)                         # 2-s-Takt im Normalbetrieb
+
 
     def stop(self):
         """Stoppe die Ampelsteuerung."""
         self.running = False
         self._set_leds([0, 0, 0])  # Alle LEDs aus
+
+    def  ampelt_test(self):
+        """Teste die Ampelsteuerung."""
+        self._set_leds([1, 0, 0]) #grün
+        sleep(1)
+        self._set_leds([0, 1, 0]) #rot
+        sleep(1)
+        self._set_leds([0, 0, 1]) #gelb
+        sleep(1)
+        self._set_leds([0, 0, 0])
 
     def _set_leds(self, states):
         """Hilfsfunktion, um die LEDs zu steuern."""
