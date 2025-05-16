@@ -1,16 +1,22 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from pathlib import Path
 
+df = pd.read_csv("innen.csv", parse_dates=["timestamp"]).set_index("timestamp")
 
-csv_file = Path("~/Wetterstation/logs/innen.csv").expanduser()
-df = pd.read_csv(csv_file, parse_dates=["timestamp"])
+fig, axes = plt.subplots(4, 1, sharex=True, figsize=(10, 8))
 
-df = df.set_index("timestamp")
+df["temp_c"].plot(ax=axes[0], legend=False)
+axes[0].set_ylabel("°C")
 
-df[["temp_c", "hum_rel", "co2_ppm"]].plot(figsize=(10, 5))
+df["hum_rel"].plot(ax=axes[1], legend=False)
+axes[1].set_ylabel("% rF")
+
+df["co2_ppm"].plot(ax=axes[2], legend=False)
+axes[2].set_ylabel("ppm")
+
+df["iaq"].plot(ax=axes[3], legend=False)
+axes[3].set_ylabel("IAQ")
+
 plt.xlabel("Zeit")
-plt.ylabel("Messwert")
-plt.title("Innenstation – Temperatur, rel. Feuchte, CO₂")
 plt.tight_layout()
-plt.show()
+plt.savefig("innen_subplots.png", dpi=150)   # oder einfach plt.show()
