@@ -1,40 +1,10 @@
 #!/usr/bin/env python3
-"""
-very_simple_bme680.py – v1.7 (always‑tuple API)
-==============================================
-
-Änderung gegenüber v1.6
------------------------
-* `read_iaq()` und `read_co2()` geben jetzt **immer ein Tupel** zurück:
-  `(wert | None, accuracy)`
-  * Bei `accuracy < 2` erhältst du `(None, acc)` – kein String mehr.
-* Die Convenience‑Strings `iaq_str()` / `co2_str()` bauen darauf auf.
-
-So kannst du – wie gewünscht – einfach entpacken:
-```python
-iaq, acc = bme.read_iaq()
-if acc >= 2:
-    print(f"IAQ {iaq:.1f} (Acc {acc})")
-else:
-    print("Kalibrierung läuft …")
-```
-
----------------------------------------------
-Minimalbeispiel
----------------------------------------------
-```python
-from very_simple_bme680 import BME680
-bme = BME680()
-print(bme.read_iaq())      # -> (None, 0) oder (85.0, 3)
-print(bme.iaq_str())       # "Kalibrierung …" oder "85.0 (Acc 3)"
-```
-"""
 
 import json, time, os, sys
 import bme68x
 import bsecConstants as bsec
 
-STATE_FILE   = "bsec_iaq_state.json"
+STATE_FILE = os.path.expanduser("~/Wetterstation/innenstation/bsec_iaq_state.json")
 SAMPLE_RATE  = bsec.BSEC_SAMPLE_RATE_LP   # 3‑Sek‑Zyklus
 MAX_WAIT_SEC = 10                         # maximale Wartezeit auf Daten
 
@@ -125,14 +95,14 @@ class BME680:
         iaq, acc = self.read_iaq()
         if acc < 2:
             mins = int((time.time() - self._start_t) // 60)
-            return f"I{mins:02d}m"
+            return "Kalibr. seit"
         return f"IAQ:{int(iaq)}"
 
     def co2_str_LCD(self):
         co2, acc = self.read_co2()
         if acc < 2:
             mins = int((time.time() - self._start_t) // 60)
-            return f"C{mins:02d}m Calib."
+            return f"{mins:02d}m"
         return f"{int(co2)}ppm"
     # ----------------------------------------------------------------
     def save_state(self):
