@@ -17,7 +17,7 @@ def main():
     ampel.ampelt_test()  # Teste die Ampelsteuerung
     ampel_thread = threading.Thread(target=ampel.start)
     ampel_thread.start()
-    speicherTime = 15
+    next_log = time.time() + 30 # erster Log nach 30sek
     print("warte auf Sensor-Daten")
 
     try:
@@ -37,12 +37,10 @@ def main():
             print("Luftqualität:", bme.iaq_str())
             print("CO₂-Äquivalent:", bme.co2_str())
 
-            #DatenBank
-            if speicherTime <= 0:
-                speicher.log_row(bme)
-                speicherTime = 15
-            else:
-                speicherTime = speicherTime - 1
+            #DatenBank log
+            if time.time() >= next_log: # wenn zeit rum log machen         
+                speicher.log_row(bme)         
+                next_log += 30             
 
             
             #buzzer.soundsek(500, 10)

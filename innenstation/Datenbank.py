@@ -14,6 +14,7 @@ class Datenbank:
 
         header = ["timestamp", "iaq", "co2_ppm", "hum_rel", "temp_c"]
         new    = [ts, iaq, co2, hum, temp]
+        print ("[Datenbank] neue log geschrieben")
 
         write_header = not self.LOGFILE.exists()
         with open(self.LOGFILE, "a", newline="") as f:
