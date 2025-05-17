@@ -5,21 +5,15 @@ import paho.mqtt.client as mqtt
 MQTT_SERVER = "localhost"
 MQTT_PATH   = "esp32/#"
  
-# The callback for when the client receives a CONNACK response from the server.
-def on_connect(client, userdata, flags, rc):
-    print("Connected "+str(rc))
- 
-    # Subscribing in on_connect() means that if we lose the connection and
-    # reconnect then subscriptions will be renewed.
+def on_connect(client, userdata, flags, reasonCode, properties):
+    print("Connected "+str(reasonCode))
     client.subscribe(MQTT_PATH)
  
-# The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     print(f"{msg.topic}: {msg.payload.decode()}")
     # more callbacks, etc
  
- 
-client = mqtt.Client("pi_innen")
+client = mqtt.Client(client_id="pi_innen", callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
 client.on_connect  = on_connect
 client.on_message  = on_message
 client.connect(MQTT_SERVER, 1883, 60)
