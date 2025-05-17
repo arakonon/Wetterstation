@@ -38,7 +38,7 @@ class checkQuality:
             if self.iaq > 201:  # Lüften
                 #print("[check_air_quality] Rot")
                 return 0
-            elif self.iaq > 150:
+            elif self.iaq > 120:
                 #print("[check_IAQ_quality] Gelb")
                 return 1
             else:

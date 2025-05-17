@@ -9,14 +9,14 @@ class LcdControl:
 		
 		# Eigene Zeichen
 		self.Carbondioxide_Symbol = [
-		0b00110,
-		0b00001,
-		0b00010,
-		0b00111,
-		0b01000,
-		0b10100,
-		0b10100,
-		0b01000
+			0b00110,
+			0b00001,
+			0b00010,
+			0b00111,
+			0b01000,
+			0b10100,
+			0b10100,
+			0b01000
 		]
 
 		self.pp_Symbol = [

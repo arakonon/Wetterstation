@@ -24,13 +24,13 @@ def main():
         while True:
             iaq, acc = bme.read_iaq()
             
-            # LCD Ausgabe
-            if acc < 2:
-                lcd.display_calibration(bme.read_temperature(), bme.read_humidity(),
-                                        bme.iaq_str_LCD(), bme.co2_str_LCD())
-            else:
-                lcd.display_measurement(bme.read_temperature(), bme.read_humidity(),
-                                        bme.iaq_str_LCD(), bme.co2_str_LCD())
+            # # LCD Ausgabe
+            # if acc < 2:
+            #     lcd.display_calibration(bme.read_temperature(), bme.read_humidity(),
+            #                             bme.iaq_str_LCD(), bme.co2_str_LCD())
+            # else:
+            #     lcd.display_measurement(bme.read_temperature(), bme.read_humidity(),
+            #                             bme.iaq_str_LCD(), bme.co2_str_LCD())
 
             # Terminal Ausgabe    
             os.system('clear')    
