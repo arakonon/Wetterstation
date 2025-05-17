@@ -9,14 +9,21 @@ SAMPLE_RATE  = bsec.BSEC_SAMPLE_RATE_LP   # 3‑Sek‑Zyklus
 MAX_WAIT_SEC = 10                         # maximale Wartezeit auf Daten
 
 class BME680:
-    def __init__(self, addr: int = 0x77, temp_offset: float = 0.0):
+    def __init__(
+            self, 
+            addr: int = 0x77, 
+            temp_offset: float = 0.0,):
+        
         self._start_t = time.time()        # ⏱ Zeitstempel für Laufzeit‑Info
 
         # --- Sensor & BSEC Init --------------------------------------
         self._sensor = bme68x.BME68X(addr, 1)        # use_bsec = 1
         self._sensor.set_sample_rate(SAMPLE_RATE)
         self._sensor.disable_debug_mode()
-        self._t_offs = temp_offset
+        
+        # temp offset in bsec einbinden
+        if temp_offset:
+            self._sensor.set_temperature_offset(temp_offset)
 
         # --- Kalibrier‑State laden -----------------------------------
         if os.path.exists(STATE_FILE):
@@ -48,7 +55,7 @@ class BME680:
     # ---- Öffentliche Lesemethoden ----------------------------------
     def read_temperature(self):
         self._update()
-        return self._last["temperature"] + self._t_offs
+        return self._last["temperature"]
 
     def read_humidity(self):
         self._update()

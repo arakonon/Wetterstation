@@ -6,7 +6,7 @@ from Datenbank import Datenbank
 import time, os
 import threading
 
-bme = BME680()
+bme = BME680(temp_offset=5.0)
 buzzer = Buzzer()
 ampel = Ampel(bme)
 lcd = LcdControl()
