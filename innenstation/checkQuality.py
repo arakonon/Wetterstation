@@ -22,7 +22,7 @@ class checkQuality:
         self.co2, self.co2_acc  = self.bme.read_co2()
         self.hum = self.bme.read_humidity()
 
-        print("[checkQuality-update_values_check_acc] loop bis acc >= 2")
+        #print("[checkQuality-update_values_check_acc] loop bis acc >= 2")
 
     def accÜber1(self):
         if self.iaq_acc < 2:
@@ -36,13 +36,13 @@ class checkQuality:
         if self.iaq_acc >= 2:
             #print(f"[check_IAQ_quality] IAQ {self.iaq:.1f} (Acc {self.acc})")
             if self.iaq > 201:  # Lüften
-                print("[check_air_quality] Rot")
+                #print("[check_air_quality] Rot")
                 return 0
-            elif self.iaq >101:
-                print("[check_IAQ_quality] Gelb")
+            elif self.iaq > 150:
+                #print("[check_IAQ_quality] Gelb")
                 return 1
             else:
-                print("[check_IAQ_quality] Grün")
+                #print("[check_IAQ_quality] Grün")
                 return 2
         else:
             print("[check_IAQ_quality] Kalibrierung läuft …")
@@ -53,13 +53,13 @@ class checkQuality:
         if self.co2_acc >= 2:
             #print(f"[check_air_quality] CO₂ {self.co2:.1f} (Acc {self.acc})")
             if self.co2 > 2000:  # Lüften
-                print("[check_CO2_quality] Rot")
+                #print("[check_CO2_quality] Rot")
                 return 0
             elif self.co2 > 1001:
-                print("[check_CO2_quality] Gelb")
+                #print("[check_CO2_quality] Gelb")
                 return 1
             else:
-                print("[check_CO2_quality] Grün")
+                #print("[check_CO2_quality] Grün")
                 return 2
         else:
             print("[check_air_quality] Kalibrierung läuft …")
@@ -67,13 +67,13 @@ class checkQuality:
         
     def check_humidity_quality(self):
         if self.hum > 70:
-            print("[check_humidity_quality] Rot")
+            #print("[check_humidity_quality] Rot")
             return 0
         elif self.hum > 60:
-            print("[check_humidity_quality] Gelb")
+            #print("[check_humidity_quality] Gelb")
             return 1
         else:
-            print("[check_humidity_quality] Grün")
+            #print("[check_humidity_quality] Grün")
             return 2
         
     def  check_acc(self):

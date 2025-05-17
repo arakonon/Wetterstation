@@ -1,12 +1,12 @@
 from lcd_control import LcdControl
 from BME680 import BME680
-from Buzzer import Buzzer
+from LegacyCode.Buzzer import Buzzer
 from Ampel import Ampel
 from Datenbank import Datenbank
 import time, os
 import threading
 
-bme = BME680(temp_offset=5.0)
+bme = BME680(temp_offset=-0.1)
 buzzer = Buzzer()
 ampel = Ampel(bme)
 lcd = LcdControl()
@@ -22,15 +22,17 @@ def main():
 
     try:
         while True:
-            # Ausgabe auf dem LCD
             iaq, acc = bme.read_iaq()
-            lcd.display_text(f"{bme.read_temperature():.1f}C {bme.read_humidity():.1f}%",
-                         bme.iaq_str_LCD() + " " + bme.co2_str_LCD())
             
-            # Wenn kal. fertig, dann custom Zeichen einfügen
-            if acc >=2:
-                lcd.lcd.cursor_pos = (1, 7)     # Zeile 2, Spalte 8 (Index ab 0)
-                lcd.display_co2()
+            # LCD Ausgabe
+            if acc < 2:
+                lcd.display_calibration(bme.read_temperature(), bme.read_humidity(),
+                                        bme.iaq_str_LCD(), bme.co2_str_LCD())
+            else:
+                lcd.display_measurement(bme.read_temperature(), bme.read_humidity(),
+                                        bme.iaq_str_LCD(), bme.co2_str_LCD())
+
+            # Terminal Ausgabe    
             os.system('clear')    
             print("\nTemperatur: %0.1f C" % bme.read_temperature())
             print("Luftfeuchtigkeit: %0.1f %%" % bme.read_humidity())
@@ -47,7 +49,6 @@ def main():
             time.sleep(2.0)
     except KeyboardInterrupt:
         bme.close()
-        # Stoppe den Buzzer, wenn das Programm beendet wird
         # Stoppe die Ampelsteuerung, wenn das Programm beendet wird
         ampel.stop()
         ampel_thread.join()
