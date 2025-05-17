@@ -12,7 +12,7 @@ class BME680:
     def __init__(
             self, 
             addr: int = 0x77, 
-            temp_offset: float = 0.0,):
+            temp_offset: float = 0.0):
         
         self._start_t = time.time()        # ⏱ Zeitstempel für Laufzeit‑Info
 
@@ -23,7 +23,7 @@ class BME680:
         
         # temp offset in bsec einbinden
         if temp_offset:
-            self._sensor.set_temperature_offset(temp_offset)
+            self._sensor.set_temp_offset(int(round(temp_offset)))
 
         # --- Kalibrier‑State laden -----------------------------------
         if os.path.exists(STATE_FILE):
@@ -103,14 +103,14 @@ class BME680:
         if acc < 2:
             mins = int((time.time() - self._start_t) // 60)
             return "Kalibr. seit"
-        return f"IAQ:{int(iaq)}"
+        return f"  :{int(iaq)}"
 
     def co2_str_LCD(self):
         co2, acc = self.read_co2()
         if acc < 2:
             mins = int((time.time() - self._start_t) // 60)
             return f"{mins:02d}m"
-        return f"{int(co2)}ppm"
+        return f"{int(co2)}"
     # ----------------------------------------------------------------
     def save_state(self):
         """Schreibt den State nur, wenn Accuracy == 3."""
@@ -118,7 +118,7 @@ class BME680:
         if acc == 3:
             with open(STATE_FILE, "w") as f:
                 json.dump(self._sensor.get_bsec_state(), f)
-            print("💾 State gespeichert →", STATE_FILE)
+            print("State gespeichert →", STATE_FILE)
         else:
             print("Accuracy < 3 – State nicht gespeichert.")
 
