@@ -36,11 +36,19 @@ class Datenbank:
         # Innenmessung in den Puffer
         iaq, _ = sensor.read_iaq()
         co2, _ = sensor.read_co2()
-        self._sum_iaq  += iaq
-        self._sum_co2  += co2
-        self._sum_hum  += sensor.read_humidity()
-        self._sum_temp += sensor.read_temperature()
-        self._count    += 1
+        hum = sensor.read_humidity()
+        temp = sensor.read_temperature()
+        valid = False                                   # ⇐ neu
+        if iaq is not None and not math.isnan(iaq):
+            self._sum_iaq += iaq;          valid = True
+        if co2 is not None and not math.isnan(co2):
+            self._sum_co2 += co2;          valid = True
+        if hum is not None and not math.isnan(hum):
+            self._sum_hum += hum;          valid = True
+        if temp is not None and not math.isnan(temp):
+            self._sum_temp += temp;        valid = True
+        if valid:                                       # ⇐ nur dann hochzählen
+            self._count += 1
 
         # Neueste Außenwerte merken (falls vorhanden)
         if temp_out is not None:
