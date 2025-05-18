@@ -1,16 +1,18 @@
-from lcd_control import LcdControl
+#from lcd_control import LcdControl
 from BME680 import BME680
-from LegacyCode.Buzzer import Buzzer
+from MqttSubs import EspAußen
+#from LegacyCode.Buzzer import Buzzer
 from Ampel import Ampel
 from Datenbank import Datenbank
 import time, os
 import threading
 
 bme = BME680(temp_offset=-0.1)
-buzzer = Buzzer()
+#buzzer = Buzzer()
 ampel = Ampel(bme)
-lcd = LcdControl()
+#lcd = LcdControl()
 speicher = Datenbank()
+esp = EspAußen(host = "127.0.0.1")
 
 def main():
     # Starte die Ampelsteuerung in einem separaten Thread
@@ -23,6 +25,10 @@ def main():
     try:
         while True:
             iaq, acc = bme.read_iaq()
+            tAußen = esp.get("temperature")
+            hAußen = esp.get("humidity")
+            tATxt = esp.get_str("temperature", unit="°C")
+            hATxt = esp.get_str("humidity"   , unit="% rF")
             
             # # LCD Ausgabe
             # if acc < 2:
@@ -39,9 +45,14 @@ def main():
             print("Luftqualität:", bme.iaq_str())
             print("CO₂-Äquivalent:", bme.co2_str())
 
+            if not esp.is_alive():
+                print("Außen-Station: connection lost")
+            else:
+                print(f"\nAußen: Temperatur {tATxt}  rF {hATxt}")
+            
             #DatenBank log
             if time.time() >= next_log: # wenn zeit rum log machen         
-                speicher.log_row(bme)         
+                speicher.log_row(bme, tAußen, hAußen)         
                 next_log += 30             
 
             

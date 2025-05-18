@@ -101,6 +101,12 @@ void loop() {
     float temperature = dht.readTemperature();
     float humidity = dht.readHumidity();
 
+    float temp_offset = 0.5;
+    float hum_offset = -1;
+
+    temperature += temp_offset;
+    humidity += hum_offset
+
     if (isnan(temperature) || isnan(humidity)) {
       Serial.println("Sensorfehler!");
       return;
