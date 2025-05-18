@@ -4,7 +4,7 @@ import paho.mqtt.client as mqtt
 
 
 class EspAußen:
-    def __init__(self, host = "localhost", topic = "esp32/#", timeout = 180):
+    def __init__(self, host = "localhost", topic = "esp32/#", timeout = 330):
         self._host     = host
         self._topic    = topic
         self._timeout  = timeout

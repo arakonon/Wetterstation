@@ -12,7 +12,7 @@ bme = BME680(temp_offset=-0.1)
 ampel = Ampel(bme)
 #lcd = LcdControl()
 speicher = Datenbank()
-esp = EspAußen(host = "127.0.0.1")
+esp = EspAußen(host="127.0.0.1", timeout=330)
 
 def main():
     # Starte die Ampelsteuerung in einem separaten Thread
@@ -48,7 +48,7 @@ def main():
             if not esp.is_alive():
                 print("Außen-Station: connection lost")
             else:
-                print(f"\nAußen: Temperatur {tATxt}  rF {hATxt}")
+                print(f"\nAußen: Temperatur; {tATxt}  Hum; {hATxt}")
             
             #DatenBank log
             if time.time() >= next_log: # wenn zeit rum log machen         
