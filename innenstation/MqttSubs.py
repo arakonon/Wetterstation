@@ -4,7 +4,7 @@ import paho.mqtt.client as mqtt
 
 
 class EspAußen:
-    def __init__(self, host = "localhost", topic = "esp32/#", timeout = 330):
+    def __init__(self, host = "localhost", topic = "esp32/#", timeout = 600):
         self._host     = host
         self._topic    = topic
         self._timeout  = timeout
@@ -17,7 +17,7 @@ class EspAußen:
         self._cli.on_connect = self._on_connect
         self._cli.on_message = self.on_message # Verbindet den Client mit dem MQTT-Broker auf dem angegebenen Host und Port 1883, mit 60 Sekunden Keepalive
         self._cli.connect(host, 1883, 60)
-        self._cli.subscribe(topic)
+        self._cli.subscribe(topic, qos=1)
         self._cli.loop_start() 
 
     def _on_connect(self, client, userdata, flags, rc):

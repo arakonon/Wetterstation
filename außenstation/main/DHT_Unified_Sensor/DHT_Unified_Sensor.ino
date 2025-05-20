@@ -15,8 +15,8 @@ const char* mqtt_server = "192.168.0.135";
 #define DHTPIN   4
 #define DHTTYPE  DHT22
 const int    SEND_INTERVAL_MIN = 5;                     // ► Mess-/Sende-Intervall
-const int    TEMP_OFFSET = 0.5    // in 0.5 °C     // optional
-const int    HUM_OFFSET  =  -1.0    // in -1 %rF
+const float  TEMP_OFFSET = 0.5;     // in 0.5 °C     // optional
+const float  HUM_OFFSET  = -1.0;    // in -1 %rF
 
 DHT          dht(DHTPIN, DHTTYPE);
 WiFiClient   espClient;
@@ -29,13 +29,27 @@ void setup() {
 
   // WLAN
   WiFi.begin(ssid, password);
+  delay(100);
   Serial.print("Connecting WiFi");
   while (WiFi.status() != WL_CONNECTED) { delay(250); Serial.print('.'); }
   Serial.println("\nWiFi OK  IP: " + WiFi.localIP().toString());
 
   // MQTT
   client.setServer(mqtt_server, 1883);
-  if (!client.connect("ESP32Client")) {
+
+  // Beispiel für Wiederverbindungslogik:
+  int attempts = 0;
+  const int MAX_ATTEMPTS = 3;
+  while (!client.connected() && attempts < MAX_ATTEMPTS) {
+    if (client.connect("ESP32Client")) {
+      Serial.println("MQTT connected!");
+    } else {
+      attempts++;
+      Serial.printf("MQTT connect fail (%d/%d), retry...\n", attempts, MAX_ATTEMPTS);
+      delay(2000);
+    }
+  }
+  if (!client.connected()) {
     Serial.println("MQTT connect fail → trotzdem senden wir nichts & schlafen");
     goSleep();
   }
@@ -53,7 +67,7 @@ void setup() {
 
   char buf[8];
   dtostrf(t, 1, 2, buf);
-  client.publish("esp32/temperature", buf, true);       // retain=true
+  client.publish("esp32/temperature", buf, true);
   dtostrf(h, 1, 2, buf);
   client.publish("esp32/humidity", buf, true);
 
@@ -62,7 +76,7 @@ void setup() {
   client.disconnect();            // sauber schließen
   WiFi.disconnect(true, true);    // Modem sofort aus
 
-  goSleep();                      // alles erledigt
+  goSleep();                      // alles erledigtÍ
 }
 
 void loop() {}                    // wird nie erreicht
