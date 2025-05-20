@@ -1,28 +1,34 @@
-#include <Wire.h>
-#define I2C_1145 0x60
-#define I2C_1151 0x53
+#include "Si115X.h"
 
-void setup() {
-  Serial.begin(115200);
-  Wire.begin();
+Si115X si1151;
 
-  Wire.beginTransmission(I2C_1145);
-  Wire.write(0x00);                  // PART_ID-Register
-  Wire.endTransmission();
-  Wire.requestFrom(I2C_1145, 1);
-  if (Wire.available()) {
-    Serial.printf("Antwort bei 0x60: 0x%02X (wahrscheinlich SI1145)\n", Wire.read());
-  }
-
-  Wire.beginTransmission(I2C_1151);
-  Wire.write(0x00);
-  Wire.endTransmission();
-  Wire.requestFrom(I2C_1151, 1);
-  if (Wire.available()) {
-    Serial.printf("Antwort bei 0x53: 0x%02X (wahrscheinlich SI1151)\n", Wire.read());
-  }
+/**
+ * Setup for configuration
+ */
+void setup()
+{
+    Serial.begin(115200);
+    if (!si1151.Begin()) {
+        Serial.println("Si1151 is not ready!");
+        while (1) {
+            delay(1000);
+            Serial.print(".");
+        };
+    }
+    else {
+        Serial.println("Si1151 is ready!");
+    }
 }
 
-  Serial.printf("gar nichts gefunden?");
+/**
+ * Loops and reads data from registers
+ */
+void loop()
+{
+    Serial.print("IR: ");
+    Serial.println(si1151.ReadIR());
+    Serial.print("Visible: ");
+    Serial.println(si1151.ReadVisible());
 
-void loop() {}
+    delay(500);
+}

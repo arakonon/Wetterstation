@@ -12,7 +12,7 @@ bme = BME680(temp_offset=-0.1)
 ampel = Ampel(bme)
 #lcd = LcdControl()
 speicher = Datenbank()
-esp = EspAußen(host="127.0.0.1", timeout=330)
+esp = EspAußen(host="127.0.0.1", timeout=600)
 
 def main():
     # Starte die Ampelsteuerung in einem separaten Thread
