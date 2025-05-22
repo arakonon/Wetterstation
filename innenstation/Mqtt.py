@@ -59,3 +59,22 @@ class EspAußen:
             # jüngster Zeitstempel:
             last_ts = max(ts for _, ts in self._values.values())
         return time.time() - last_ts < self._timeout
+
+
+
+
+class MQTTPublisher:
+    def __init__(self, topic_prefix="wetterstation/innen", host="localhost"):
+        self.topic_prefix = topic_prefix
+        self._cli = mqtt.Client()
+        self._cli.connect(host, 1883, 60)
+
+    def publish(self, values: dict):
+        """Werte sofort publishen"""
+        for key, value in values.items():
+            topic = f"{self.topic_prefix}/{key}"
+            try:
+                self._cli.publish(topic, value)
+                #print(f"[MQTT] {topic}: {value}")
+            except Exception as e:
+                print(f"[MQTT] Fehler beim Publish: {e}")

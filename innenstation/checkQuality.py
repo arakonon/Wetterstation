@@ -86,6 +86,12 @@ class checkQuality:
             print("[check_acc] Kalibrierung abgeschlossen.")
             return False
         
+    def check_emergency(self):
+        if self.co2 > 1999 or self.iaq > 249 or self.temp > 39 or self.hum > 79:
+            return True
+        else:
+            return False
+        
 
 
     # def mittel_quality(self):
