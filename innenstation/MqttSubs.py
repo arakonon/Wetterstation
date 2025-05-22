@@ -8,21 +8,21 @@ class EspAußen:
         self._host     = host
         self._topic    = topic
         self._timeout  = timeout
-        self._values   = {}              # empfangene Werte gespeichert (z.B. Sensordaten)
-        self._lock     = threading.Lock() # Sorgt für thread-sicheren Zugriff auf values (?)
+        self._values   = {}
+        self._lock     = threading.Lock()
 
-        self._cli = mqtt.Client(                       # gefixt?
+        self._cli = mqtt.Client(
             callback_api_version=mqtt.CallbackAPIVersion.VERSION1,
             client_id="pi_bridge")
         self._cli.on_connect = self._on_connect
-        self._cli.on_message = self.on_message # Verbindet den Client mit dem MQTT-Broker auf dem angegebenen Host und Port 1883, mit 60 Sekunden Keepalive
+        self._cli.on_message = self.on_message
         self._cli.connect(host, 1883, 60)
-        self._cli.subscribe(topic, qos=1)
+        # self._cli.subscribe(topic, qos=1)  # <--- Diese Zeile entfernen!
         self._cli.loop_start() 
 
     def _on_connect(self, client, userdata, flags, rc):
         print("[EspAußen] Verbunden, rc", rc)
-        client.subscribe(self._topic)
+        client.subscribe(self._topic, qos=1)  # <--- Hier bleibt qos=1!
 
     def on_message(self, client, userdata, msg):
         print(f"{msg.topic}: {msg.payload.decode()}") # Gibt Topic und Wert aus
