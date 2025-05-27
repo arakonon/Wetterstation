@@ -35,10 +35,10 @@ class checkQuality:
         """Überprüfe die Luftqualität und aktiviere den Alarm bei Bedarf."""
         if self.iaq_acc >= 2:
             #print(f"[check_IAQ_quality] IAQ {self.iaq:.1f} (Acc {self.acc})")
-            if self.iaq > 201:  # Lüften
+            if self.iaq > 151:  # Lüften
                 #print("[check_air_quality] Rot")
                 return 0
-            elif self.iaq > 120:
+            elif self.iaq > 101:
                 #print("[check_IAQ_quality] Gelb")
                 return 1
             else:
@@ -84,6 +84,12 @@ class checkQuality:
             return True
         else:
             print("[check_acc] Kalibrierung abgeschlossen.")
+            return False
+        
+    def check_emergency(self):
+        if self.co2 > 1999 or self.iaq > 249 or self.temp > 39 or self.hum > 79:
+            return True
+        else:
             return False
         
 

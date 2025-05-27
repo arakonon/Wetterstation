@@ -15,3 +15,14 @@ class Buzzer:
         print("Buzzer aus")
         self.buzzer.off()
 
+# if __name__ == "__main__":
+#     buzzer = Buzzer()
+#     try:
+#         while True:
+#             buzzer.soundsek(300, 14)  # 300 ms, 14% Lautstärke
+#             time.sleep(1)             # 1 Sekunde Pause
+#     except KeyboardInterrupt:
+#         print("Test beendet.")
+#         buzzer.buzzer.off()
+
+
