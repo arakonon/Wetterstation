@@ -1,4 +1,7 @@
 from RPLCD.i2c import CharLCD
+import threading, time
+from gpiozero import Button
+from signal import pause
 
 class LcdControl:
 
@@ -90,23 +93,76 @@ class LcdControl:
 		self.lcd.write_string('\x04') 
 
 	def display_calibration(self, temperature, humidity, iaq_str, co2_str):
-		self.display_text(f"{temperature:.1f}C {humidity:.1f}%",
+		self.display_text(f"{temperature:.1f}°C  {humidity:.1f}%",
 					iaq_str + " " + co2_str)
 
 	def display_measurement(self, temperature, humidity, iaq_str, co2_str):
-		self.display_text(f" {temperature:.1f}C  {humidity:.1f}%rF",
-					iaq_str + " C :" + co2_str + " m")
+		self.display_text(f" {temperature:.1f}°C  {humidity:.1f}%rF",
+					iaq_str + "   :" + co2_str + " m")
 		
-		self.lcd.cursor_pos = (0, 6)
-		self.display_grad()
+		# self.lcd.cursor_pos = (0, 6)
+		# self.display_grad()
 		self.lcd.cursor_pos = (1, 0)
 		self.display_ai()
 		self.lcd.cursor_pos = (1, 1)
 		self.display_r()
+		self.lcd.cursor_pos = (1, 7)
+		self.lcd.write_string("C")
 		self.lcd.cursor_pos = (1, 8)
 		self.display_co2()
 		self.lcd.cursor_pos = (1, 14)
 		self.display_pp()
-		
 
-		
+	def button_test(self, pin=17):
+		button = Button(pin, pull_up=True)
+		gedrueckt = False
+		tastendruck_fertig = False
+
+		def on_press():
+			nonlocal gedrueckt
+			gedrueckt = True
+			print("Button gedrückt!")
+
+		def on_release():
+			nonlocal gedrueckt, tastendruck_fertig
+			if gedrueckt:
+				print("Button losgelassen!")
+				print("→ Kompletter Tastendruck durchgeführt ✅")
+				gedrueckt = False
+				tastendruck_fertig = True
+
+		button.when_pressed = on_press
+		button.when_released = on_release
+
+		print("Warte auf vollständigen Tastendruck...")
+		while not tastendruck_fertig:
+			time.sleep(0.05)
+
+class lcdCheck(threading.Thread):
+	def __init__(self, pin=17, anzahl_zustaende=3, debounce_time=0.6):
+		super().__init__()
+		self._running = True
+		self.zustand = 0
+		self.anzahl_zustaende = anzahl_zustaende
+		self.button = Button(pin, pull_up=True)
+		self.debounce_time = debounce_time
+		self._last_press = 0
+		self.button.when_pressed = self.naechster_zustand
+
+	def naechster_zustand(self):
+		now = time.time()
+		if now - self._last_press > self.debounce_time:
+			self.zustand = (self.zustand + 1) % self.anzahl_zustaende
+			print(f"Neuer Zustand: {self.zustand}")
+			self._last_press = now
+
+	def run(self):
+		while self._running:
+			time.sleep(0.1)
+
+	def stop(self):
+		self._running = False
+
+
+
+
