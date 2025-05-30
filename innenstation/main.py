@@ -36,6 +36,7 @@ def main():
             hAußen = esp.get("humidity")
             tATxt = esp.get_str("temperature", unit="°C")
             hATxt = esp.get_str("humidity"   , unit="%rF")
+            uvAußen = esp.get("uv")
             
             # LCD Ausgabe mit Button Switch
             if button.zustand == 0:
@@ -51,7 +52,7 @@ def main():
                 if not esp.is_alive():
                     lcd.display_text("Aussenstation:",  "Connection Lost")
                 else:
-                    lcd.display_text("Aussenstation:", f"{tATxt}  {hATxt}")
+                    lcd.display_text(f"Aussen: {tATxt}  {hATxt},", "UV: " + uvAußen)
             elif button.zustand == 2:
                 lcd.lcd.backlight_enabled = False
 
@@ -65,6 +66,7 @@ def main():
                 print("Außen-Station: connection lost")
             else:
                 print(f"\nAußen: Temperatur; {tATxt}  Hum; {hATxt}")
+                print("UV: " + uvAußen)
 
             # Mqtt publish für OpenHab
             werte = {
@@ -77,7 +79,7 @@ def main():
             
             #DatenBank log
             if time.time() >= next_log: # wenn zeit rum log machen         
-                speicher.log_row(bme, tAußen, hAußen)         
+                speicher.log_row(bme, tAußen, hAußen, uvAußen)         
                 next_log += 30             
 
             #buzzer.soundsek(500, 10)
