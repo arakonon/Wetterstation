@@ -52,7 +52,7 @@ def main():
                 if not esp.is_alive():
                     lcd.display_text("Aussenstation:",  "Connection Lost")
                 else:
-                    lcd.display_text(f"Aussen: {tATxt}  {hATxt},", "UV: " + uvAußen)
+                    lcd.display_text(f"Out: - UV: " + str(uvAußen if uvAußen is not None else "-"), f"{tATxt}  {hATxt}")
             elif button.zustand == 2:
                 lcd.lcd.backlight_enabled = False
 
@@ -66,7 +66,7 @@ def main():
                 print("Außen-Station: connection lost")
             else:
                 print(f"\nAußen: Temperatur; {tATxt}  Hum; {hATxt}")
-                print("UV: " + uvAußen)
+                print("UV: " + str(uvAußen if uvAußen is not None else "-"))
 
             # Mqtt publish für OpenHab
             werte = {
