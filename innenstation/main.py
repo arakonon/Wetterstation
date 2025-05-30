@@ -56,7 +56,7 @@ def main():
                 lcd.lcd.backlight_enabled = False
 
             # Terminal Ausgabe    
-            os.system('clear')    
+            #os.system('clear')    
             print("\nTemperatur: %0.1f °C" % bme.read_temperature())
             print("Luftfeuchtigkeit: %0.1f %%" % bme.read_humidity())
             print("Luftqualität:", bme.iaq_str())

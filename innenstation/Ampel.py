@@ -32,14 +32,14 @@ class Ampel:
             co2 = self.alarm.check_CO2_quality()
             hum = self.alarm.check_humidity_quality()
 
-            #print(f"[Ampel-Debug] IAQ: {iaq}, CO2: {co2}, HUM: {hum}")
-            #print(f"[Ampel-Debug] Zählerstände - Rot: {self.rot}, Gelb: {self.gelb}, Grün: {self.grün}")
+            print(f"[Ampel-Debug] IAQ: {iaq}, CO2: {co2}, HUM: {hum}")
+            print(f"[Ampel-Debug] Zählerstände - Rot: {self.rot}, Gelb: {self.gelb}, Grün: {self.grün}")
 
             if iaq == 0 or co2 == 0 or hum == 0:
                 self.rot -= 1
                 #print(f"[Ampel-Debug] Rot-Zähler dekrementiert: {self.rot}")
                 if self.rot <= 0:
-                    #print("[Ampel-Debug] Schalte auf ROT")
+                    print("[Ampel-Debug] Schalte auf ROT")
                     self.led.color = (0.8, 0, 0)           # Rot 80%
                     self.rot, self.gelb, self.grün = 3, 3, 3
                     #print("[Ampel-Debug] Zähler zurückgesetzt auf 3")
@@ -50,7 +50,7 @@ class Ampel:
                 self.gelb -= 1
                 #print(f"[Ampel-Debug] Gelb-Zähler dekrementiert: {self.gelb}")
                 if self.gelb <= 0:
-                    #print("[Ampel-Debug] Schalte auf GELB")
+                    print("[Ampel-Debug] Schalte auf GELB")
                     self.led.color = (0.1, 0.1, 0)  # Gelb 10%
                     self.rot, self.gelb, self.grün = 3, 3, 3
                     #print("[Ampel-Debug] Zähler zurückgesetzt auf 3")
@@ -58,7 +58,7 @@ class Ampel:
                 self.grün -= 1
                 #print(f"[Ampel-Debug] Grün-Zähler dekrementiert: {self.grün}")
                 if self.grün <= 0:
-                    #print("[Ampel-Debug] Schalte auf GRÜN")
+                    print("[Ampel-Debug] Schalte auf GRÜN")
                     self.led.color = (0, 0.1, 0)   # Grün 10%
                     self.rot, self.gelb, self.grün = 3, 3, 3
                     #print("[Ampel-Debug] Zähler zurückgesetzt auf 3")
