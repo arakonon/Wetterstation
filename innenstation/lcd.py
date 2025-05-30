@@ -65,6 +65,28 @@ class LcdControl:
 			0b00000,
 			0b00000
 			]
+		
+		self.temp_Symbol = [
+			0b00100,
+			0b01010,
+			0b01010,
+			0b01010,
+			0b01110,
+			0b11111,
+			0b11111,
+			0b01110
+		]
+
+		self.hum_Symbol = [
+			0b00100,
+			0b00100,
+			0b01010,
+			0b01010,
+			0b10001,
+			0b10001,
+			0b10001,
+			0b01110
+		]
 
 	def display_text(self, line1="", line2=""):
 		self.lcd.clear()
@@ -91,6 +113,15 @@ class LcdControl:
 	def display_grad(self):
 		self.lcd.create_char(4, self.grad_Symbol)
 		self.lcd.write_string('\x04') 
+
+	def display_temp(self):
+		self.lcd.create_char(5, self.temp_Symboll)
+		self.lcd.write_string('\x05') 
+
+	def display_hum(self):
+		self.lcd.create_char(6, self.hum_Symbol)
+		self.lcd.write_string('\x06') 
+
 
 	def display_calibration(self, temperature, humidity, iaq_str, co2_str):
 		self.display_text(f"{temperature:.1f}°C  {humidity:.1f}%",
