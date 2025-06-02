@@ -86,7 +86,6 @@ void setup() {
   uint16_t rawUV = analogRead(UV_PIN);
   int kategorie = getSonneKategorie(rawUV);
 
-  char buf[16];
   snprintf(buf, sizeof(buf), "%d", rawUV);
   client.publish("esp32/sun_raw", buf, true);
 
