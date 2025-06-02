@@ -6,22 +6,27 @@
 
 #define UV_PIN       34          // GPIO34 (ADC1_CH6) fürs UV-Signal
 
-// Sensor-Kennwerte GUVA-S12SD
-const float UV_OFFSET_V    = 0.99f;  // Offset-Spannung bei 0 mW/cm²
-const float UV_SENSITIVITY = 0.06f;  // V pro (mW/cm²)
-
 DHT dht(DHTPIN, DHTTYPE);
+
+// Gibt eine von fünf Sonnen-Kategorien als int zurück (0 = nicht sonnig, 4 = super sonnig)
+int getSonneKategorie(uint16_t raw) {
+  if      (raw <  20) return 0;
+  else if (raw <  50) return 1;
+  else if (raw < 100) return 2;
+  else if (raw < 150) return 3;
+  else                return 4;
+}
 
 void setup() {
   Serial.begin(115200);
-  while(!Serial){}  // warten auf seriellen Port
+  while (!Serial) {}  // warten auf seriellen Port
 
   // DHT starten
   dht.begin();
 
   // ADC für UV-Sensor konfigurieren
-  analogReadResolution(12);               // 12-Bit ADC (0–4095)
-  analogSetPinAttenuation(UV_PIN, ADC_11db);  // Messbereich bis 3.3 V
+  analogReadResolution(12);                 // 12-Bit ADC (0–4095)
+  analogSetPinAttenuation(UV_PIN, ADC_11db); // Messbereich bis 3.3 V
 
   Serial.println("=== Sensor Test Start ===");
 }
@@ -29,7 +34,7 @@ void setup() {
 void loop() {
   // ─── DHT22 auslesen ───────────────────────────────────────────────────
   float t = dht.readTemperature();   // Temperatur in °C
-  float h = dht.readHumidity();      // Luftfeuchte in %rF
+  float h = dht.readHumidity();      // Luftfeuchte in % r.F.
 
   if (isnan(t) || isnan(h)) {
     Serial.println("DHT22-Fehler!");
@@ -37,15 +42,11 @@ void loop() {
     Serial.printf("DHT22 → T: %.2f °C    H: %.2f %%\n", t, h);
   }
 
-  // ─── UV-Sensor auslesen ────────────────────────────────────────────────
+  // ─── UV-Sensor (nur Rohwert und Kategorie) ────────────────────────────
   uint16_t rawUV = analogRead(UV_PIN);
-  float    vAdc  = rawUV * (3.3f / 4095.0f);               // gemessene Spannung
-  float    uv    = (vAdc > UV_OFFSET_V)
-                   ? (vAdc - UV_OFFSET_V) / UV_SENSITIVITY
-                   : 0.0f;                                 // UV in mW/cm²
+  int kategorie = getSonneKategorie(rawUV);
 
-  Serial.printf("UV    → Raw: %4d    V: %.2f V    UVA: %.2f mW/cm²\n",
-                rawUV, vAdc, uv);
+  Serial.printf("UV-Rohwert: %4d    Kategorie: %d\n", rawUV, kategorie);
 
   Serial.println("-------------------------------");
   delay(2000);  // alle 2 Sekunden wiederholen

@@ -27,11 +27,11 @@ class Datenbank:
         self._header = [
             "timestamp", "iaq", "co2_ppm",
             "hum_rel", "temp_c",
-            "temp_out", "hum_out", "uv_out"
+            "temp_out", "hum_out", "uv_kategorie", "uv_raw"
         ]
 
     # ---------- öffentliche API ----------
-    def log_row(self, sensor, temp_out=None, hum_out=None, uv_out=None):  
+    def log_row(self, sensor, temp_out=None, hum_out=None, uv_kat=None, uv_raw=None):  
         """Alle 30 s aufrufen. Schreibt erst nach 300 s eine Zeile."""
 
         # Innenmessung in den Puffer
@@ -56,8 +56,10 @@ class Datenbank:
             self._ext_temp = temp_out
         if hum_out is not None:
             self._ext_hum  = hum_out
-        if uv_out is not None:                # <--- ergänzt
-            self._ext_uv = uv_out             # <--- ergänzt
+        if uv_kat is not None:
+            self._ext_uv = uv_kat
+        if uv_raw is not None:
+            self._ext_uv_raw = uv_raw  # <--- neu
 
         # Ist das Intervall abgelaufen?
         now = time.time()
@@ -77,7 +79,8 @@ class Datenbank:
             avg(self._sum_temp),
             "" if self._ext_temp is None else round(self._ext_temp, 2),
             "" if self._ext_hum  is None else round(self._ext_hum, 2),
-            "" if self._ext_uv   is None else round(self._ext_uv, 2),   
+            "" if self._ext_uv   is None else round(self._ext_uv, 2),
+            "" if getattr(self, '_ext_uv_raw', None) is None else int(self._ext_uv_raw),  # <--- neu
         ]
 
         # ----- CSV schreiben -----

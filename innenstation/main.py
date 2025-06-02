@@ -28,6 +28,15 @@ def main():
     next_log = time.time() + 30 # erster Log nach 30sek
     print("warte auf Sensor-Daten")
 
+    # Für UV-Sensor
+    sonnenKategorieNamen = [
+                "nicht sonnig",
+                "leicht sonnig",
+                "mäßig sonnig",
+                "sehr sonnig",
+                "super sonnig"
+            ]
+
     # Main-Loop
     try:
         while True:
@@ -37,7 +46,9 @@ def main():
             hAußen = esp.get("humidity")
             tATxt = esp.get_str("temperature", unit="°C")
             hATxt = esp.get_str("humidity"   , unit="%rF")
-            uvAußen = esp.get("uv")
+            sonnenWert = esp.get("sun_raw")
+            sonnenKategorie = esp.get("sun_kategorie")
+            
             
             # LCD Ausgabe mit Button Switch
             if button.zustand == 0:
@@ -53,7 +64,7 @@ def main():
                 if not esp.is_alive():
                     lcd.display_text("Aussenstation:",  "Connection Lost")
                 else:
-                    lcd.display_text(f"Out: - UV: " + str(uvAußen if uvAußen is not None else "-"), f"{tATxt}  {hATxt}")
+                    lcd.display_text(f"Aussen: {tATxt}  {hATxt},", "UV: " + sonnenKategorieNamen[int(sonnenKategorie)])
             elif button.zustand == 2:
                 lcd.lcd.backlight_enabled = False
 
@@ -67,7 +78,7 @@ def main():
                 print("Außen-Station: connection lost")
             else:
                 print(f"\nAußen: Temperatur; {tATxt}  Hum; {hATxt}")
-                print("UV: " + str(uvAußen if uvAußen is not None else "-"))
+                print("Sun: raw; " + sonnenWert + " Kategorie " + sonnenKategorie)
 
             # Mqtt publish für OpenHab
             werte = {
@@ -80,7 +91,13 @@ def main():
             
             #DatenBank log
             if time.time() >= next_log: # wenn zeit rum log machen         
-                speicher.log_row(bme, tAußen, hAußen, uvAußen)         
+                speicher.log_row(
+                    bme,
+                    tAußen,
+                    hAußen,
+                    sonnenKategorie,
+                    sonnenWert
+                )         
                 next_log += 30             
 
             #buzzer.soundsek(500, 10)
