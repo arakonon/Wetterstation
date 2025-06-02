@@ -10,7 +10,7 @@
 
 // ---------- Konfiguration ----------
 const char* ssid         = "Vodafone-DCF8_2,4Ghz";
-const char* password     = "----";
+const char* password     = "Fmm4b3hMLPUj374h";
 const char* mqtt_server  = "192.168.0.135";
 
 #define DHTPIN    4
@@ -18,8 +18,7 @@ const char* mqtt_server  = "192.168.0.135";
 
 // UV-Sensor (analoger GUVA-S12SD)
 #define UV_PIN            34          // ADC1_CH6 → GPIO34
-const float  UV_OFFSET_V   = 0.99f;   // Sensor-Offset bei 0 mW/cm² [V]
-const float  UV_SENSITIVITY = 0.06f;  // Sensor-Kennlinie [V per (mW/cm²)]
+
 
 const int    SEND_INTERVAL_MIN = 5;   // ► Mess-/Sende-Intervall
 const float  TEMP_OFFSET      = 0.5;  // in °C
@@ -83,16 +82,18 @@ void setup() {
   client.publish("esp32/humidity",    buf, true);
   Serial.printf("Sent T=%.2f°C  H=%.2f%%\n", t, h);
 
-  // ─── Messung UV-Sensor ───────────────────────────────────────────────
+  // ─── Messung UV-Sensor ─────────────────────────────────────────
   uint16_t rawUV = analogRead(UV_PIN);
-  float    vAdc  = rawUV * (3.3f / 4095.0f);                  // gemessene Spannung
-  float    uv    = (vAdc > UV_OFFSET_V)
-                   ? (vAdc - UV_OFFSET_V) / UV_SENSITIVITY
-                   : 0.0f;                                   // mW/cm²
+  int kategorie = getSonneKategorie(rawUV);
 
-  dtostrf(uv, 4, 2, buf);
-  client.publish("esp32/uv", buf, true);
-  Serial.printf("RawUV:%4d  V:%.2f V  UV:%.2f mW/cm²\n", rawUV, vAdc, uv);
+  char buf[16];
+  snprintf(buf, sizeof(buf), "%d", rawUV);
+  client.publish("esp32/sun_raw", buf, true);
+
+  snprintf(buf, sizeof(buf), "%d", kategorie);
+  client.publish("esp32/sun_kategorie", buf, true);
+
+  Serial.printf("UV-Rohwert: %4d    Kategorie: %d\n", rawUV, kategorie);
   // ────────────────────────────────────────────────────────────────────
 
   client.disconnect();
@@ -112,4 +113,13 @@ void goSleep() {
   esp_sleep_enable_timer_wakeup(SLEEP_US);
   delay(100);
   esp_deep_sleep_start();
+}
+
+// Gibt eine von fünf Sonnen-Kategorien als int zurück (0 = nicht sonnig, 4 = super sonnig)
+int getSonneKategorie(uint16_t raw) {
+  if      (raw <  20) return 0;
+  else if (raw <  50) return 1;
+  else if (raw < 100) return 2;
+  else if (raw < 150) return 3;
+  else                return 4;
 }
