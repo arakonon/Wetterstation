@@ -1,22 +1,24 @@
 #!/usr/bin/env python3
+
 from lcd import LcdControl, lcdCheck
 from BME680 import BME680
 from Mqtt import EspAußen, MQTTPublisher
 #from LegacyCode.Buzzer import Buzzer
 from Ampel import Ampel
 from Datenbank import Datenbank
+from UvApi import UvApiClient
 import time, os
 import threading
 
 # Imports, Klasssen
 bme = BME680(temp_offset=-0.1)
-#buzzer = Buzzer()
 ampel = Ampel(bme)
 lcd = LcdControl()
 button = lcdCheck()  # lcdCheck-Thread-Objekt
 speicher = Datenbank()
 esp = EspAußen(host="127.0.0.1", timeout=600)
 mqtt = MQTTPublisher()
+uvApi = UvApiClient()
 
 def main():
    
@@ -37,6 +39,7 @@ def main():
                 "super sonnig"
             ]
 
+
     # Main-Loop
     try:
         while True:
@@ -48,6 +51,7 @@ def main():
             hATxt = esp.get_str("humidity"   , unit="%rF")
             sonnenWert = esp.get("sun_raw")
             sonnenKategorie = esp.get("sun_kategorie")
+            uv = uvApi.get_current_uv()
             
             
             # LCD Ausgabe mit Button Switch
@@ -79,6 +83,7 @@ def main():
             else:
                 print(f"\nAußen: Temperatur; {tATxt}  Hum; {hATxt}")
                 print("Sun: raw; " + sonnenWert + " Kategorie " + sonnenKategorie)
+                print("UV-Wert von API: " + uv)
 
             # Mqtt publish für OpenHab
             werte = {
@@ -86,6 +91,7 @@ def main():
             "hum": bme.read_humidity(),
             "iaq": bme.read_iaq()[0],
             "co2": bme.read_co2()[0],
+            "uvApi": uv,
             }
             mqtt.publish(werte)
             
@@ -96,7 +102,8 @@ def main():
                     tAußen,
                     hAußen,
                     sonnenKategorie,
-                    sonnenWert
+                    sonnenWert,
+                    uv 
                 )         
                 next_log += 30             
 

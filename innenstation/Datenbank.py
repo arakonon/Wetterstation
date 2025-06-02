@@ -27,11 +27,15 @@ class Datenbank:
         self._header = [
             "timestamp", "iaq", "co2_ppm",
             "hum_rel", "temp_c",
-            "temp_out", "hum_out", "uv_kategorie", "uv_raw"
+            "temp_out", "hum_out", "uv_kategorie", "uv_raw", "uv_api"  
         ]
 
+        # Neueste Außenwerte merken (falls vorhanden)
+        self._ext_uv_raw = None  # <--- neu
+        self._ext_uv_api = None  # <-- neu
+
     # ---------- öffentliche API ----------
-    def log_row(self, sensor, temp_out=None, hum_out=None, uv_kat=None, uv_raw=None):  
+    def log_row(self, sensor, temp_out=None, hum_out=None, uv_kat=None, uv_raw=None, uv_api=None):  
         """Alle 30 s aufrufen. Schreibt erst nach 300 s eine Zeile."""
 
         # Innenmessung in den Puffer
@@ -39,7 +43,7 @@ class Datenbank:
         co2, _ = sensor.read_co2()
         hum = sensor.read_humidity()
         temp = sensor.read_temperature()
-        valid = False                                   # ⇐ neu
+        valid = False                                   
         if iaq is not None and not math.isnan(iaq):
             self._sum_iaq += iaq;          valid = True
         if co2 is not None and not math.isnan(co2):
@@ -48,7 +52,7 @@ class Datenbank:
             self._sum_hum += hum;          valid = True
         if temp is not None and not math.isnan(temp):
             self._sum_temp += temp;        valid = True
-        if valid:                                       # ⇐ nur dann hochzählen
+        if valid:                                       
             self._count += 1
 
         # Neueste Außenwerte merken (falls vorhanden)
@@ -59,7 +63,9 @@ class Datenbank:
         if uv_kat is not None:
             self._ext_uv = uv_kat
         if uv_raw is not None:
-            self._ext_uv_raw = uv_raw  # <--- neu
+            self._ext_uv_raw = uv_raw
+        if uv_api is not None:                
+            self._ext_uv_api = uv_api         
 
         # Ist das Intervall abgelaufen?
         now = time.time()
@@ -80,7 +86,8 @@ class Datenbank:
             "" if self._ext_temp is None else round(self._ext_temp, 2),
             "" if self._ext_hum  is None else round(self._ext_hum, 2),
             "" if self._ext_uv   is None else round(self._ext_uv, 2),
-            "" if getattr(self, '_ext_uv_raw', None) is None else int(self._ext_uv_raw),  # <--- neu
+            "" if getattr(self, '_ext_uv_raw', None) is None else int(self._ext_uv_raw),
+            "" if self._ext_uv_api is None else round(self._ext_uv_api, 2)  
         ]
 
         # ----- CSV schreiben -----
