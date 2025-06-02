@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from lcd import LcdControl, lcdCheck
 from BME680 import BME680
 from Mqtt import EspAußen, MQTTPublisher
