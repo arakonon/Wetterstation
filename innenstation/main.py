@@ -30,15 +30,6 @@ def main():
     next_log = time.time() + 30 # erster Log nach 30sek
     print("warte auf Sensor-Daten")
 
-    # Für UV-Sensor
-    sonnenKategorieNamen = [
-                "nicht sonnig",
-                "leicht sonnig",
-                "mäßig sonnig",
-                "sehr sonnig",
-                "super sonnig"
-            ]
-
 
     # Main-Loop
     try:
@@ -68,7 +59,10 @@ def main():
                 if not esp.is_alive():
                     lcd.display_text("Aussenstation:",  "Connection Lost")
                 else:
-                    lcd.display_text(f"Aussen: {tATxt}  {hATxt},", "UV: " + sonnenKategorieNamen[int(sonnenKategorie)])
+                    lcd.display_text(f"Aussen: UV:{uv}", f"{tATxt} {hATxt}")
+                    lcd.sunSymbol(sonnenKategorie)
+
+
             elif button.zustand == 2:
                 lcd.lcd.backlight_enabled = False
 
@@ -82,8 +76,8 @@ def main():
                 print("Außen-Station: connection lost")
             else:
                 print(f"\nAußen: Temperatur; {tATxt}  Hum; {hATxt}")
-                print("Sun: raw; " + sonnenWert + " Kategorie " + sonnenKategorie)
-                print("UV-Wert von API: " + uv)
+                print(f"Sun: raw; {sonnenWert} Kategorie {sonnenKategorie}")
+                print(f"UV-Wert von API: {uv}")
 
             # Mqtt publish für OpenHab
             werte = {
