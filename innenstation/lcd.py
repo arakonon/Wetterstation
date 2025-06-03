@@ -55,37 +55,48 @@ class LcdControl:
 			0b10100
 			]
 		
-		self.grad_Symbol = [
-			0b01000,
-			0b10100,
-			0b01000,
+		self.sun1_Symbol =[
 			0b00000,
-			0b00000,
-			0b00000,
+			0b10101,
+			0b01010,
+			0b10001,
+			0b01010,
+			0b10101,
 			0b00000,
 			0b00000
 			]
-		
-		self.temp_Symbol = [
-			0b00100,
+
+		self.sun2_Symbol = [
+			0b00000,
+			0b10101,
 			0b01010,
+			0b10001,
+			0b01110,
+			0b10101,
+			0b00000,
+			0b00000
+			]
+
+		self.sun3_Symbol = [
+			0b00000,
+			0b10101,
 			0b01010,
-			0b01010,
+			0b11111,
+			0b01110,
+			0b10101,
+			0b00000,
+			0b00000
+			]  
+
+		self.sun4_Symbol = [
+			0b00000,
+			0b10101,
 			0b01110,
 			0b11111,
-			0b11111,
-			0b01110
-		]
-
-		self.hum_Symbol = [
-			0b00100,
-			0b00100,
-			0b01010,
-			0b01010,
-			0b10001,
-			0b10001,
-			0b10001,
-			0b01110
+			0b01110,
+			0b10101,
+			0b00000,
+			0b00000
 		]
 
 	def display_text(self, line1="", line2=""):
@@ -110,18 +121,21 @@ class LcdControl:
 		self.lcd.create_char(3, self.r_Symbol)
 		self.lcd.write_string('\x03')
 
-	def display_grad(self):
-		self.lcd.create_char(4, self.grad_Symbol)
-		self.lcd.write_string('\x04') 
+	def display_sun1(self):
+		self.lcd.create_char(4, self.sun1_Symbol)
+		self.lcd.write_string('\x04')
 
-	def display_temp(self):
-		self.lcd.create_char(5, self.temp_Symboll)
-		self.lcd.write_string('\x05') 
+	def display_sun2(self):
+		self.lcd.create_char(5, self.sun2_Symbol)
+		self.lcd.write_string('\x05')
 
-	def display_hum(self):
-		self.lcd.create_char(6, self.hum_Symbol)
-		self.lcd.write_string('\x06') 
+	def display_sun3(self):
+		self.lcd.create_char(6, self.sun3_Symbol)
+		self.lcd.write_string('\x06')
 
+	def display_sun4(self):
+		self.lcd.create_char(7, self.sun4_Symbol)
+		self.lcd.write_string('\x07')
 
 	def display_calibration(self, temperature, humidity, iaq_str, co2_str):
 		self.display_text(f"{temperature:.1f}°C  {humidity:.1f}%",
@@ -143,6 +157,22 @@ class LcdControl:
 		self.display_co2()
 		self.lcd.cursor_pos = (1, 14)
 		self.display_pp()
+	
+	def sunSymbol (self, symbol):
+		self.lcd.cursor_pos = (0,14)
+
+		if symbol == 1:
+			self.display_sun1()
+		elif symbol == 2:
+			self.display_sun2()
+		elif symbol == 3:
+			self.display_sun3()
+		elif symbol == 4:
+			self.display_sun4()
+		
+		# zum testen von lcd, später wegkommentieren
+		# else:
+		# 	self.display_sun3()
 
 	def button_test(self, pin=17):
 		button = Button(pin, pull_up=True)
