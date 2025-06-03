@@ -116,8 +116,8 @@ void goSleep() {
 
 // Gibt eine von fünf Sonnen-Kategorien als int zurück (0 = nicht sonnig, 4 = super sonnig)
 int getSonneKategorie(uint16_t raw) {
-  if      (raw <  20) return 0;
-  else if (raw <  50) return 1;
+  if      (raw <  1) return 0;
+  else if (raw <  30) return 1;
   else if (raw < 100) return 2;
   else if (raw < 150) return 3;
   else                return 4;
