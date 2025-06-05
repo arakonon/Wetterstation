@@ -12,6 +12,7 @@ class checkQuality:
         self.iaq, self.iaq_acc = self.bme.read_iaq()
         self.co2, self.co2_acc  = self.bme.read_co2()
         self.hum = self.bme.read_humidity()
+        self.temp = self.bme.read_temperature()
 
         #print(f"[update_values] IAQ {self.iaq:.1f} (Acc {self.iaq_acc})")
         #print(f"[update_values] CO₂ {self.co2:.1f} (Acc {self.co2_acc})")
@@ -21,6 +22,7 @@ class checkQuality:
         self.iaq, self.iaq_acc = self.bme.read_iaq()
         self.co2, self.co2_acc  = self.bme.read_co2()
         self.hum = self.bme.read_humidity()
+        self.temp = self.bme.read_temperature()
 
         #print("[checkQuality-update_values_check_acc] loop bis acc >= 2")
 
