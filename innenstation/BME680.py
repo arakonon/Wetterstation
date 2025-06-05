@@ -80,7 +80,7 @@ class BME680:
         self._update()
         return self._last["raw_gas"]
 
-    # ---- IAQ / CO₂ --------------------------------------------------
+    # ---- IAQ / eCO₂ --------------------------------------------------
     def read_iaq(self):
         # Holt aktuellen IAQ-Wert (Luftqualität) und Genauigkeit
         # Gibt (iaq, acc) zurück, aber nur echten Wert wenn acc >= 2, sonst None
@@ -89,13 +89,13 @@ class BME680:
         acc = self._last["iaq_accuracy"]
         return (iaq if acc >= 2 else None, acc)
 
-    def read_co2(self):
+    def read_eco2(self):
         # Holt aktuellen CO₂-Äquivalent-Wert und Genauigkeit
-        # Gibt (co2, acc) zurück, aber nur echten Wert wenn acc >= 2, sonst None
+        # Gibt (eco2, acc) zurück, aber nur echten Wert wenn acc >= 2, sonst None
         self._update()
-        co2 = self._last["co2_equivalent"]
+        eco2 = self._last["co2_equivalent"]
         acc = self._last["co2_accuracy"]
-        return (co2 if acc >= 2 else None, acc)
+        return (eco2 if acc >= 2 else None, acc)
 
     # ---- Convenience-Strings ---------------------------------------
     def iaq_str(self):
@@ -108,15 +108,15 @@ class BME680:
             return f"Kalibrierung seit: {mins:02d} Minuten"
         return f"{iaq:.1f} (Acc {acc})"
 
-    def co2_str(self):
-        # Gibt einen formatierten String für den CO₂-Wert zurück.
+    def eco2_str(self):
+        # Gibt einen formatierten String für den eCO₂-Wert zurück.
         # Zeigt Kalibrierungsdauer, falls accuracy < 2.
         
-        co2, acc = self.read_co2()
+        eco2, acc = self.read_eco2()
         if acc < 2:
             mins = int((time.time() - self._start_t) // 60)
             return f"Kalibrierung seit: {mins:02d} Minuten"
-        return f"{int(co2)} ppm (Acc {acc})"
+        return f"{int(eco2)} ppm (Acc {acc})"
     
     #---- Convenience-Strings für LCD -------------------------------
     def iaq_str_LCD(self):
@@ -127,13 +127,13 @@ class BME680:
             return "Kalibr. seit"
         return f"  :{int(iaq)}"
 
-    def co2_str_LCD(self):
+    def eco2_str_LCD(self):
         # Kurzer String für LCD-Anzeige: CO₂ oder Kalibrierungszeit.
-        co2, acc = self.read_co2()
+        eco2, acc = self.read_eco2()
         if acc < 2:
             mins = int((time.time() - self._start_t) // 60)
             return f"{mins:02d}m"
-        return f"{int(co2)}"
+        return f"{int(eco2)}"
     # ----------------------------------------------------------------
     def save_state(self):
         # Speichert den aktuellen Kalibrierungszustand des Sensors.

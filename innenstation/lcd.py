@@ -1,7 +1,7 @@
 from RPLCD.i2c import CharLCD
 import threading, time
 from gpiozero import Button
-from signal import pause
+
 
 class LcdControl:
 
@@ -10,7 +10,7 @@ class LcdControl:
         self.lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1,
                            cols=16, rows=2, charmap='A00', auto_linebreaks=True, backlight_enabled=True)
         
-        # Eigene Zeichen als 8x5 Bitmaps(?)(siehe library) definieren (z.B. CO2, ppm, AI, Sonne etc.)
+        # Eigene Zeichen als 8x5 Bitmaps(?)(siehe library) definieren (z.B. eCO2, ppm, AI, Sonne etc.)
         self.Carbondioxide_Symbol = [
             0b00110,
             0b00001,
@@ -106,8 +106,8 @@ class LcdControl:
         self.lcd.cursor_pos = (1, 0)
         self.lcd.write_string(line2)
 
-    def display_co2(self):
-        # CO2-Symbol auf LCD anzeigen (Char 0)
+    def display_eco2(self):
+        # eCO2-Symbol auf LCD anzeigen (Char 0)
         self.lcd.create_char(0, self.Carbondioxide_Symbol)
         self.lcd.write_string('\x00') 
 
@@ -146,25 +146,27 @@ class LcdControl:
         self.lcd.create_char(7, self.sun4_Symbol)
         self.lcd.write_string('\x07')
 
-    def display_calibration(self, temperature, humidity, iaq_str, co2_str):
-        # Zeigt Kalibrierungsdaten (Temp, Feuchte, IAQ, CO2) auf LCD an
+    def display_calibration(self, temperature, humidity, iaq_str, eco2_str):
+        # Zeigt Kalibrierungsdaten (Temp, Feuchte, IAQ, eCO2) auf LCD an
         self.display_text(f"{temperature:.1f}°C  {humidity:.1f}%",
-                    iaq_str + " " + co2_str)
+                    iaq_str + " " + eco2_str)
 
-    def display_measurement(self, temperature, humidity, iaq_str, co2_str):
-        # Zeigt Messdaten (Temp, Feuchte, IAQ, CO2) mit Symbolen auf LCD an
+    def display_measurement(self, temperature, humidity, iaq_str, eco2_str):
+        # Zeigt Messdaten (Temp, Feuchte, IAQ, eCO2) mit Symbolen auf LCD an
         self.display_text(f" {temperature:.1f}°C  {humidity:.1f}%rF",
-                    iaq_str + "   :" + co2_str + " m")
+                    iaq_str + "   :" + eco2_str + " m")
         
         # Symbole und Einheiten gezielt auf bestimmte Positionen setzen
         self.lcd.cursor_pos = (1, 0)
         self.display_ai()
         self.lcd.cursor_pos = (1, 1)
         self.display_r()
+        self.lcd.cursor_pos = (1, 6)
+        self.lcd.write_string("e")
         self.lcd.cursor_pos = (1, 7)
         self.lcd.write_string("C")
         self.lcd.cursor_pos = (1, 8)
-        self.display_co2()
+        self.display_eco2()
         self.lcd.cursor_pos = (1, 14)
         self.display_pp()
     
@@ -183,31 +185,6 @@ class LcdControl:
         # else:
         # 	self.display_sun3()
 
-    def button_test(self, pin=17):
-        # Testet einen Button am angegebenen GPIO-Pin
-        button = Button(pin, pull_up=True)
-        gedrueckt = False
-        tastendruck_fertig = False
-
-        def on_press():
-            nonlocal gedrueckt
-            gedrueckt = True
-            print("Button gedrückt!")
-
-        def on_release():
-            nonlocal gedrueckt, tastendruck_fertig
-            if gedrueckt:
-                print("Button losgelassen!")
-                print("→ Kompletter Tastendruck durchgeführt ✅")
-                gedrueckt = False
-                tastendruck_fertig = True
-
-        button.when_pressed = on_press
-        button.when_released = on_release
-
-        print("Warte auf vollständigen Tastendruck...")
-        while not tastendruck_fertig:
-            time.sleep(0.05)
 
 class lcdCheck(threading.Thread):
     def __init__(self, pin=17, anzahl_zustaende=3, debounce_time=0.6):

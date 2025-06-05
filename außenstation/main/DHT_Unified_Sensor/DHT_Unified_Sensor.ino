@@ -1,9 +1,3 @@
-/*********
- Grund­legender Code von Rui Santos
- aber abgeändert (DHT22 + Deep-Sleep alle 5 min)
-   + UV-Sensor (GUVA-S12SD) integriert
-*********/
-
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <DHT.h>

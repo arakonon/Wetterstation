@@ -39,11 +39,11 @@ class Ampel:
 
             # Einzelne Qualitätswerte abfragen (0=schlecht, 1=mittel, 2=gut)
             iaq = self.alarm.check_IAQ_quality()      # Luftqualität
-            co2 = self.alarm.check_CO2_quality()      # CO2-Gehalt
+            eco2 = self.alarm.check_eCO2_quality()      # eCO2-Gehalt
             hum = self.alarm.check_humidity_quality() # Luftfeuchtigkeit
 
             # Wenn einer der Werte schlecht ist (0), Rot-Zähler dekrementieren
-            if iaq == 0 or co2 == 0 or hum == 0:
+            if iaq == 0 or eco2 == 0 or hum == 0:
                 self.rot -= 1
                 # Wenn Rot-Zähler abgelaufen ist, auf Rot schalten
                 if self.rot <= 0:
@@ -56,7 +56,7 @@ class Ampel:
                         self.buzzer.soundsek(500, 14)
 
             # Wenn einer der Werte mittel ist (1), Gelb-Zähler dekrementieren
-            elif iaq == 1 or co2 == 1 or hum == 1:
+            elif iaq == 1 or eco2 == 1 or hum == 1:
                 self.gelb -= 1
                 # Wenn Gelb-Zähler abgelaufen ist, auf Gelb schalten
                 if self.gelb <= 0:

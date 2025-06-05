@@ -14,7 +14,7 @@ class Datenbank:
         self.INTERVAL = interval_sec  # Intervall für Mittelwert/Schreibvorgang (Sekunden)
 
         # Puffer für Innenwerte initialisieren
-        self._sum_iaq = self._sum_co2 = 0.0
+        self._sum_iaq = self._sum_eco2 = 0.0
         self._sum_hum = self._sum_temp = 0.0
         self._count = 0  # Anzahl gültiger Messungen im aktuellen Intervall
 
@@ -28,7 +28,7 @@ class Datenbank:
 
         # CSV-Header für die Logdatei
         self._header = [
-            "timestamp", "iaq", "co2_ppm",
+            "timestamp", "iaq", "eco2_ppm",
             "hum_rel", "temp_c",
             "temp_out", "hum_out", "uv_kategorie", "uv_raw", "uv_api"  
         ]
@@ -39,14 +39,14 @@ class Datenbank:
     def log_row(self, sensor, temp_out=None, hum_out=None, uv_kat=None, uv_raw=None, uv_api=None):  
         # Holt aktuelle Innenwerte vom Sensor und summiert sie für die Mittelwertbildung
         iaq, _ = sensor.read_iaq()
-        co2, _ = sensor.read_co2()
+        eco2, _ = sensor.read_eco2()
         hum = sensor.read_humidity()
         temp = sensor.read_temperature()
         valid = False                                   
         if iaq is not None and not math.isnan(iaq):
             self._sum_iaq += iaq;          valid = True
-        if co2 is not None and not math.isnan(co2):
-            self._sum_co2 += co2;          valid = True
+        if eco2 is not None and not math.isnan(eco2):
+            self._sum_eco2 += eco2;          valid = True
         if hum is not None and not math.isnan(hum):
             self._sum_hum += hum;          valid = True
         if temp is not None and not math.isnan(temp):
@@ -80,7 +80,7 @@ class Datenbank:
         row = [
             datetime.datetime.now().isoformat(timespec="seconds"),
             avg(self._sum_iaq),
-            avg(self._sum_co2),
+            avg(self._sum_eco2),
             avg(self._sum_hum),
             avg(self._sum_temp),
             "" if self._ext_temp is None else round(self._ext_temp, 2),
@@ -101,7 +101,7 @@ class Datenbank:
         print("[Datenbank] neue Zeile geschrieben:", row)
 
         # Puffer zurücksetzen für das nächste Intervall
-        self._sum_iaq = self._sum_co2 = 0.0
+        self._sum_iaq = self._sum_eco2 = 0.0
         self._sum_hum = self._sum_temp = 0.0
         self._count = 0
         self._last_write = now

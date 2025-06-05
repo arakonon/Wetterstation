@@ -3,11 +3,10 @@
 from lcd import LcdControl, lcdCheck
 from BME680 import BME680
 from Mqtt import EspAußen, MQTTPublisher
-#from LegacyCode.Buzzer import Buzzer
 from Ampel import Ampel
 from Datenbank import Datenbank
 from UvApi import UvApiClient
-import time, os
+import time
 import threading
 
 # Sensor- und Steuerungsobjekte initialisieren
@@ -40,7 +39,7 @@ def main():
             hATxt = esp.get_str("humidity"   , unit="%rF") # Außenfeuchte als String
             sonnenWert = esp.get("sun_raw")                # Sonnenwert (Rohwert)
             sonnenKategorie = esp.get("sun_kategorie")     # Sonnenkategorie (1-4)
-            uv = uvApi.get_current_uv()                    # UV-Wert von API
+            uv = uvApi.hohle_current_uv()                    # UV-Wert von API
 
             # LCD-Ausgabe je nach Button-Zustand (Menü)
             if button.zustand == 0:
@@ -48,11 +47,11 @@ def main():
                 if acc < 2:
                     # Sensor noch nicht kalibriert: Kalibrierungsanzeige
                     lcd.display_calibration(bme.read_temperature(), bme.read_humidity(),
-                                            bme.iaq_str_LCD(), bme.co2_str_LCD())
+                                            bme.iaq_str_LCD(), bme.eco2_str_LCD())
                 else:
                     # Sensor kalibriert: Messwerte anzeigen
                     lcd.display_measurement(bme.read_temperature(), bme.read_humidity(),
-                                            bme.iaq_str_LCD(), bme.co2_str_LCD())
+                                            bme.iaq_str_LCD(), bme.eco2_str_LCD())
             elif button.zustand == 1:
                 lcd.lcd.backlight_enabled = True
                 if not esp.is_alive():
@@ -71,7 +70,7 @@ def main():
             print("\nTemperatur: %0.1f °C" % bme.read_temperature())
             print("Luftfeuchtigkeit: %0.1f %%" % bme.read_humidity())
             print("Luftqualität:", bme.iaq_str())
-            print("CO₂-Äquivalent:", bme.co2_str())
+            print("CO₂-Äquivalent:", bme.eco2_str())
             if not esp.is_alive():
                 print("Außen-Station: connection lost")
             else:
@@ -84,7 +83,7 @@ def main():
                 "temp": bme.read_temperature(),
                 "hum": bme.read_humidity(),
                 "iaq": bme.read_iaq()[0],
-                "co2": bme.read_co2()[0],
+                "eco2": bme.read_eco2()[0],
                 "uvApi": uv,
             }
             mqtt.publish(werte)
@@ -110,7 +109,9 @@ def main():
         ampel_thread.join()   # Warten bis Ampel-Thread beendet
         button.stop()         # Button-Thread stoppen
         button.join()         # Warten bis Button-Thread beendet
-        pass
+        pass # Tue nichts?
 
+# Dieser Block sorgt dafür, dass das Programm NUR dann startet, wenn die Datei direkt ausgeführt wird (z.B. mit "python3 main.py").
+# Wird die Datei hingegen von einem anderen Python-Skript importiert, passiert hier nichts automatisch.
 if __name__ == "__main__":
-    main()
+    main()  # Starte das Hauptprogramm

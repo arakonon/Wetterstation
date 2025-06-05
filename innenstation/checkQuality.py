@@ -10,7 +10,7 @@ class checkQuality:
     def update_values(self):
         # Holt aktuelle Messwerte vom Sensor und speichert sie als Attribute
         self.iaq, self.iaq_acc = self.bme.read_iaq()      # IAQ-Wert + Genauigkeit
-        self.co2, self.co2_acc  = self.bme.read_co2()     # CO2-Wert + Genauigkeit
+        self.eco2, self.eco2_acc  = self.bme.read_eco2()     # eCO2-Wert + Genauigkeit
         self.hum = self.bme.read_humidity()               # Luftfeuchtigkeit
         self.temp = self.bme.read_temperature()           # Temperatur
 
@@ -39,13 +39,13 @@ class checkQuality:
             print("[check_IAQ_quality] Kalibrierung läuft …")
             return None
 
-    def check_CO2_quality(self):
-        # Prüft die CO2-Qualität (sofern Kalibrierung ok)
-        if self.co2_acc >= 2:
-            # CO2 > 2000: sehr schlecht (rot), >1001: mittel (gelb), sonst gut (grün)
-            if self.co2 > 2000:
+    def check_eCO2_quality(self):
+        # Prüft die eCO2-Qualität (sofern Kalibrierung ok)
+        if self.eco2_acc >= 2:
+            # eCO2 > 2000: sehr schlecht (rot), >1001: mittel (gelb), sonst gut (grün)
+            if self.eco2 > 2000:
                 return 0  # Rot
-            elif self.co2 > 1001:
+            elif self.eco2 > 1001:
                 return 1  # Gelb
             else:
                 return 2  # Grün
@@ -74,8 +74,8 @@ class checkQuality:
         
     def check_emergency(self):
         # Prüft auf Notfallbedingungen (sehr schlechte Werte)
-        # CO2 > 1999, IAQ > 249, Temperatur > 39°C, Luftfeuchte > 79%
-        if self.co2 > 1999 or self.iaq > 249 or self.temp > 39 or self.hum > 79:
+        # eCO2 > 1999, IAQ > 249, Temperatur > 39°C, Luftfeuchte > 79%
+        if self.eco2 > 1999 or self.iaq > 249 or self.temp > 39 or self.hum > 79:
             return True
         else:
             return False
