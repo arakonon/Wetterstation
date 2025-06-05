@@ -9,9 +9,9 @@
 #include <DHT.h>
 
 // ---------- Konfiguration ----------
-const char* ssid         = "Vodafone-DCF8_2,4Ghz";
-const char* password     = "Fmm4b3hMLPUj374h";
-const char* mqtt_server  = "192.168.0.135";
+const char* ssid         = "-----";
+const char* password     = "-----";
+const char* mqtt_server  = "-----";
 
 #define DHTPIN    4
 #define DHTTYPE   DHT22
