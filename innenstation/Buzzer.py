@@ -1,28 +1,32 @@
-from gpiozero import PWMOutputDevice
-import time
+from gpiozero import PWMOutputDevice  # Importiere Klasse für PWM-Ausgabe (z.B. für Buzzer)
+import time  # Importiere Zeitmodul für Pausen
 
 class Buzzer:
     def __init__(self):
-        # Definiere buzzer als Instanzvariable
+        # Initialisiere den Buzzer auf GPIO-Pin 24 als PWM-Ausgang
+        # PWM ermöglicht variable Lautstärke durch Pulsweitenmodulation
         self.buzzer = PWMOutputDevice(24)
 
     def soundsek(self, millisekunden, lautstärke):
-        lauts = lautstärke / 100
-        zeit = millisekunden / 1000
-        print(f"Buzzer an mit {lautstärke:.0f}% Lautstärke")
-        self.buzzer.value = lauts  # Setze die Lautstärke
-        time.sleep(zeit)
-        print("Buzzer aus")
-        self.buzzer.off()
+        # Gibt für eine bestimmte Zeit einen Ton mit gewünschter Lautstärke aus
+        lauts = lautstärke / 100  # Umrechnung von Prozent in Wert zwischen 0.0 und 1.0 (PWM)
+        zeit = millisekunden / 1000  # Umrechnung von ms in Sekunden für sleep()
+        #print(f"Buzzer an mit {lautstärke:.0f}% Lautstärke")  # Debug-Ausgabe
+        self.buzzer.value = lauts  # Setze PWM-Wert (Lautstärke)
+        time.sleep(zeit)  # Warte die gewünschte Zeit
+        #print("Buzzer aus")  # Debug-Ausgabe
+        self.buzzer.off()  # Schalte Buzzer aus (PWM auf 0)
 
+# Testcode (auskommentiert):
+# Wenn dieses Skript direkt ausgeführt wird, wird der Buzzer im Sekundentakt getestet.
 # if __name__ == "__main__":
 #     buzzer = Buzzer()
 #     try:
 #         while True:
-#             buzzer.soundsek(300, 14)  # 300 ms, 14% Lautstärke
+#             buzzer.soundsek(300, 14)  # 300 ms Ton, 14% Lautstärke
 #             time.sleep(1)             # 1 Sekunde Pause
 #     except KeyboardInterrupt:
 #         print("Test beendet.")
-#         buzzer.buzzer.off()
+#         buzzer.buzzer.off()           # Buzzer sicher ausschalten
 
 

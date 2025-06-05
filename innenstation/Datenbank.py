@@ -4,41 +4,40 @@ from pathlib import Path
 
 
 class Datenbank:
-    """Puffert Innenwerte, mittelt sie über 5 min
-       und loggt sie zusammen mit dem letzten ESP-Wert."""
+    #Puffert Innenwerte, mittelt sie über 5 min und loggt sie zusammen mit dem letzten ESP-Wert
 
     def __init__(self, logfile="~/Wetterstation/logs/innen.csv",
                  interval_sec=300):
+        # Logdatei-Pfad vorbereiten, ggf. Verzeichnisse anlegen
         self.LOGFILE = Path(logfile).expanduser()
         self.LOGFILE.parent.mkdir(parents=True, exist_ok=True)
-        self.INTERVAL = interval_sec
+        self.INTERVAL = interval_sec  # Intervall für Mittelwert/Schreibvorgang (Sekunden)
 
-        # Puffer für Innenwerte
+        # Puffer für Innenwerte initialisieren
         self._sum_iaq = self._sum_co2 = 0.0
         self._sum_hum = self._sum_temp = 0.0
-        self._count = 0
+        self._count = 0  # Anzahl gültiger Messungen im aktuellen Intervall
 
-        # Letzter ESP-Wert
+        # Außenwerte
         self._ext_temp = None
         self._ext_hum = None
-        self._ext_uv = None      
-        self._last_write = time.time()
+        self._ext_uv = None  
+        self._ext_uv_raw = None
+        self._ext_uv_api = None    
+        self._last_write = time.time()  # Zeitstempel des letzten Schreibvorgangs
 
+        # CSV-Header für die Logdatei
         self._header = [
             "timestamp", "iaq", "co2_ppm",
             "hum_rel", "temp_c",
             "temp_out", "hum_out", "uv_kategorie", "uv_raw", "uv_api"  
         ]
 
-        # Neueste Außenwerte merken (falls vorhanden)
-        self._ext_uv_raw = None  # <--- neu
-        self._ext_uv_api = None  # <-- neu
+        
 
-    # ---------- öffentliche API ----------
+    # Hauptfunktion zum Puffern und Schreiben der Messwerte
     def log_row(self, sensor, temp_out=None, hum_out=None, uv_kat=None, uv_raw=None, uv_api=None):  
-        """Alle 30 s aufrufen. Schreibt erst nach 300 s eine Zeile."""
-
-        # Innenmessung in den Puffer
+        # Holt aktuelle Innenwerte vom Sensor und summiert sie für die Mittelwertbildung
         iaq, _ = sensor.read_iaq()
         co2, _ = sensor.read_co2()
         hum = sensor.read_humidity()
@@ -53,9 +52,9 @@ class Datenbank:
         if temp is not None and not math.isnan(temp):
             self._sum_temp += temp;        valid = True
         if valid:                                       
-            self._count += 1
+            self._count += 1  # Nur wenn mindestens ein Wert gültig ist
 
-        # Neueste Außenwerte merken (falls vorhanden)
+        # Neueste Außenwerte merken
         if temp_out is not None:
             self._ext_temp = temp_out
         if hum_out is not None:
@@ -67,16 +66,17 @@ class Datenbank:
         if uv_api is not None:                
             self._ext_uv_api = uv_api         
 
-        # Ist das Intervall abgelaufen?
+        # Prüfen, ob das Intervall abgelaufen ist – nur dann schreiben
         now = time.time()
         if now - self._last_write < self.INTERVAL:
-            return  # noch warten – nichts schreiben
+            return  # Noch nicht genug Zeit vergangen, nichts tun
 
-        # ----- Mittelwerte bilden -----
-        if self._count == 0:         # sollte nie passieren
+        # Mittelwerte berechnen, falls mindestens eine Messung vorliegt
+        if self._count == 0:         # Sollte eigentlich nie passieren
             return
         avg = lambda s: round(s / self._count, 2)
 
+        # Zeile für CSV-Datei zusammenbauen
         row = [
             datetime.datetime.now().isoformat(timespec="seconds"),
             avg(self._sum_iaq),
@@ -90,7 +90,7 @@ class Datenbank:
             "" if self._ext_uv_api is None else round(self._ext_uv_api, 2)  
         ]
 
-        # ----- CSV schreiben -----
+        # CSV-Datei öffnen und ggf. Header schreiben
         write_header = not self.LOGFILE.exists()
         with open(self.LOGFILE, "a", newline="") as f:
             w = csv.writer(f)
@@ -100,7 +100,7 @@ class Datenbank:
 
         print("[Datenbank] neue Zeile geschrieben:", row)
 
-        # ----- Puffer zurücksetzen -----
+        # Puffer zurücksetzen für das nächste Intervall
         self._sum_iaq = self._sum_co2 = 0.0
         self._sum_hum = self._sum_temp = 0.0
         self._count = 0

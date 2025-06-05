@@ -4,104 +4,79 @@
 class checkQuality:
 
     def __init__(self, bmee):
-        self.bme = bmee
-        #self.mittelTimer = 15
+        self.bme = bmee  # Sensorobjekt speichern
+        #self.mittelTimer = 15  # (Optional) Timer für Mittelwertbildung
 
     def update_values(self):
-        """Aktualisiere die Sensorwerte."""
-        self.iaq, self.iaq_acc = self.bme.read_iaq()
-        self.co2, self.co2_acc  = self.bme.read_co2()
-        self.hum = self.bme.read_humidity()
-        self.temp = self.bme.read_temperature()
-
-        #print(f"[update_values] IAQ {self.iaq:.1f} (Acc {self.iaq_acc})")
-        #print(f"[update_values] CO₂ {self.co2:.1f} (Acc {self.co2_acc})")
-        #print(f"[update_values] Hum {self.hum:.1f}")
+        # Holt aktuelle Messwerte vom Sensor und speichert sie als Attribute
+        self.iaq, self.iaq_acc = self.bme.read_iaq()      # IAQ-Wert + Genauigkeit
+        self.co2, self.co2_acc  = self.bme.read_co2()     # CO2-Wert + Genauigkeit
+        self.hum = self.bme.read_humidity()               # Luftfeuchtigkeit
+        self.temp = self.bme.read_temperature()           # Temperatur
 
     def update_values_check_acc(self):
+        # Holt nur IAQ-Wert und Genauigkeit (z.B. für Kalibrierungsschleife), einfach so
         self.iaq, self.iaq_acc = self.bme.read_iaq()
 
-        #print("[checkQuality-update_values_check_acc] loop bis acc >= 2")
-
     def accÜber1(self):
+        # True, solange die IAQ-Genauigkeit < 2 ist (Kalibrierung läuft)
         if self.iaq_acc < 2:
             return True
         else:
             return False
 
-
     def check_IAQ_quality(self):
-        """Überprüfe die Luftqualität und aktiviere den Alarm bei Bedarf."""
+        # Prüft die Luftqualität anhand des IAQ-Werts (sofern Kalibrierung ok)
         if self.iaq_acc >= 2:
-            #print(f"[check_IAQ_quality] IAQ {self.iaq:.1f} (Acc {self.acc})")
-            if self.iaq > 151:  # Lüften
-                #print("[check_air_quality] Rot")
-                return 0
+            # IAQ > 151: sehr schlecht (rot), >101: mittel (gelb), sonst gut (grün)
+            if self.iaq > 151:
+                return 0  # Rot
             elif self.iaq > 101:
-                #print("[check_IAQ_quality] Gelb")
-                return 1
+                return 1  # Gelb
             else:
-                #print("[check_IAQ_quality] Grün")
-                return 2
+                return 2  # Grün
         else:
             print("[check_IAQ_quality] Kalibrierung läuft …")
             return None
 
     def check_CO2_quality(self):
-        """Überprüfe die CO₂-Qualität und aktiviere den Alarm bei Bedarf."""
+        # Prüft die CO2-Qualität (sofern Kalibrierung ok)
         if self.co2_acc >= 2:
-            #print(f"[check_air_quality] CO₂ {self.co2:.1f} (Acc {self.acc})")
-            if self.co2 > 2000:  # Lüften
-                #print("[check_CO2_quality] Rot")
-                return 0
+            # CO2 > 2000: sehr schlecht (rot), >1001: mittel (gelb), sonst gut (grün)
+            if self.co2 > 2000:
+                return 0  # Rot
             elif self.co2 > 1001:
-                #print("[check_CO2_quality] Gelb")
-                return 1
+                return 1  # Gelb
             else:
-                #print("[check_CO2_quality] Grün")
-                return 2
+                return 2  # Grün
         else:
             print("[check_air_quality] Kalibrierung läuft …")
             return None
         
     def check_humidity_quality(self):
+        # Prüft die Luftfeuchtigkeit (ohne Kalibrierung)
         if self.hum > 70:
-            #print("[check_humidity_quality] Rot")
-            return 0
+            return 0  # Rot
         elif self.hum > 60:
-            #print("[check_humidity_quality] Gelb")
-            return 1
+            return 1  # Gelb
         else:
-            #print("[check_humidity_quality] Grün")
-            return 2
+            return 2  # Grün
         
-    def  check_acc(self):
+    def check_acc(self):
+        # Frische IAQ-Werte holen und prüfen, ob Kalibrierung abgeschlossen ist
         checkQuality.update_values_check_acc(self)
-        """Überprüfe die Kalibrierung."""
         if self.iaq_acc < 2:
-            #print("[check_acc] Kalibrierung läuft …")
+            # Noch nicht kalibriert
             return True
         else:
             print("[check_acc] Kalibrierung abgeschlossen.")
             return False
         
     def check_emergency(self):
+        # Prüft auf Notfallbedingungen (sehr schlechte Werte)
+        # CO2 > 1999, IAQ > 249, Temperatur > 39°C, Luftfeuchte > 79%
         if self.co2 > 1999 or self.iaq > 249 or self.temp > 39 or self.hum > 79:
             return True
         else:
             return False
-        
 
-
-    # def mittel_quality(self):
-    #     # Wird jede 2 sec ausgeführt
-    #     if self.mittelTimer <= 0:
-            
-    #     else:
-    #         if (self.iaq_acc >= 2):
-    #             iaqM = self.iaq
-    #             co2M = self.co2
-    #             humM = self.hum
-    #             self.mittelTimer = self.mittelTimer - 1
-    #         else:
-    #             print("[checkQuality-mittel_quality] Kalibrierung...")
