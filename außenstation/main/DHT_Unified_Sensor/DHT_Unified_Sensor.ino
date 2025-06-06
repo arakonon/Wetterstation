@@ -2,16 +2,19 @@
 #include <PubSubClient.h>
 #include <DHT.h>
 
-// ---------- Konfiguration ----------
+//Konfiguration
 const char* ssid         = "-----";
 const char* password     = "-----";
 const char* mqtt_server  = "-----";
+// final
+// ('*' = Zeiger auf ein festes String-Literal im Flash spart RAM)?
 
-#define DHTPIN    4
+
+#define DHTPIN 4  // #define --> Präprozessor-Makro(?): ersetzt vor der Kompilierung jedes „DHTPIN“ durch „4“, schneller
 #define DHTTYPE   DHT22
 
-// UV-Sensor (analoger GUVA-S12SD)
-#define UV_PIN            34          // ADC1_CH6 → GPIO34
+// UV-Sensor 
+#define UV_PIN            34          // ADC1_CH6 = GPIO34
 
 
 const int    SEND_INTERVAL_MIN = 5;   // ► Mess-/Sende-Intervall
@@ -26,10 +29,11 @@ void setup() {
   Serial.begin(115200);
   dht.begin();
 
-  // ─── NEU: ADC-Setup für UV ─────────────────────────────────────────────
-  analogReadResolution(12);                         // 12-Bit: 0–4095
-  analogSetPinAttenuation(UV_PIN, ADC_11db);        // bis 3.3 V messen
-  // ────────────────────────────────────────────────────────────────────
+  // ADC-Setup für UV 
+  analogReadResolution(12);                         // Setzt die Auflösung auf 12 Bit → Messwerte von 0–4095 für feinere Abstufung
+  analogSetPinAttenuation(UV_PIN, ADC_11db);        // Wählt 11 dB Abschwächung, um am Pin Spannungen korrekt messen zu können
+    // Ohne analogSetPinAttenuation(UV_PIN, ADC_11db) bleibt die Standard-Abschwächung (0 dB), 
+    // d.h. der ADC misst nur bis 1,1 V; alle höheren Spannungen werden „geclippt“ und führen zu ungenauen (maximalen) Rohwerten?
 
   // WLAN
   WiFi.begin(ssid, password);
@@ -51,35 +55,46 @@ void setup() {
     } else {
       attempts++;
       Serial.printf("MQTT connect fail (%d/%d), retry...\n", attempts, MAX_ATTEMPTS);
+        // "(%d/%d)" sind die beiden Platzhalter für ganze Zahlen (signed int). 
+        // Beim printf werden sie der Reihe nach durch attempts und MAX_ATTEMPTS ersetzt,
       delay(2000);
     }
   }
   if (!client.connected()) {
-    Serial.println("MQTT connect fail → nichts senden & schlafen");
+    Serial.println("MQTT connect fail, nichts senden & schlafen");
     goSleep();
   }
 
-  // ─── Messung DHT22 ───────────────────────────────────────────────────
+  // Messung DHT22
   float t = dht.readTemperature();
   float h = dht.readHumidity();
-  if (isnan(t) || isnan(h)) {
+  if (isnan(t) || isnan(h)) { // Not a Number?
     Serial.println("DHT-Fehler – skip");
-    goSleep();
   }
   t += TEMP_OFFSET;
   h += HUM_OFFSET;
 
-  char buf[16];
-  dtostrf(t,  4, 2, buf);
+  char buf[16];                       // Puffer (C-String) mit Platz für bis zu 15 Zeichen + '\0'
+  // Für Gleitkommawerte (float) nutzt man dtostrf(), 
+  // weil Arduino-Snprintf/Printf standardmäßig keine %f-Ausgabe unterstützt:
+  dtostrf(t, 4, 2, buf);              // dtostrf = “double to string float”:  
+                                    // wandelt float t in einen C-String um,  
+                                    // Gesamtbreite 4 Zeichen, 2 Nachkommastellen, Ergebnis in buf
+
   client.publish("esp32/temperature", buf, true);
+    // buf ist der C-String (Payload), z.B. „23.45“
+    // true ist der “retained”-Flag, der Broker speichert die letzte Nachricht 
+    // und liefert sie neuen Subscriber sofort nach dem Subscribe aus.
   dtostrf(h,  4, 2, buf);
   client.publish("esp32/humidity",    buf, true);
   Serial.printf("Sent T=%.2f°C  H=%.2f%%\n", t, h);
 
-  // ─── Messung UV-Sensor ─────────────────────────────────────────
-  uint16_t rawUV = analogRead(UV_PIN);
+  // Messung UV-Sensor 
+  uint16_t rawUV = analogRead(UV_PIN);  
+  // uint16_t ist ein unsigned 16-Bit Ganzzahltyp (0…65535) aus <stdint.h>?
   int kategorie = getSonneKategorie(rawUV);
 
+  // Für ganze Zahlen (uint16_t, int) reicht snprintf() mit "%d" völlig aus:
   snprintf(buf, sizeof(buf), "%d", rawUV);
   client.publish("esp32/sun_raw", buf, true);
 
@@ -87,7 +102,7 @@ void setup() {
   client.publish("esp32/sun_kategorie", buf, true);
 
   Serial.printf("UV-Rohwert: %4d    Kategorie: %d\n", rawUV, kategorie);
-  // ────────────────────────────────────────────────────────────────────
+  
 
   client.disconnect();
   WiFi.disconnect(true, true);

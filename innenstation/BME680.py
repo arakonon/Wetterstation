@@ -1,11 +1,10 @@
-#!/usr/bin/env python3
-
 import json, time, os, sys
 import bme68x
 import bsecConstants as bsec
 
 # Pfad zur Datei, in der der Kalibrierungszustand des Sensors gespeichert wird
 STATE_FILE = os.path.expanduser("~/Wetterstation/innenstation/bsec_iaq_state.json")
+    # .expanduser() Ersetzt ein das im Pfad durch das Home-Verzeichnis.
 SAMPLE_RATE  = bsec.BSEC_SAMPLE_RATE_LP   # Sampling-Rate: Low Power (3 Sekunden Zyklus)
 MAX_WAIT_SEC = 10                         # Maximale Wartezeit auf neue Sensordaten (Timeout)
 
@@ -15,44 +14,53 @@ class BME680:
             addr: int = 0x77, 
             temp_offset: float = 0.0):
         # Startzeit merken, um Kalibrierungsdauer zu berechnen
-        self._start_t = time.time()        
+        self.startT = time.time()        
 
-        # --- Sensor & BSEC Initialisierung --------------------------------------
+        # --- Sensor & BSEC Initialisierung ---
         # Sensor-Objekt erzeugen, Adresse und BSEC-Modus setzen
-        self._sensor = bme68x.BME68X(addr, 1)        # use_bsec = 1
-        self._sensor.set_sample_rate(SAMPLE_RATE)    # Sampling-Rate setzen
-        self._sensor.disable_debug_mode()            # Debug-Modus deaktivieren
+        self.sensor = bme68x.BME68X(addr, 1)        # use_bsec = 1
+        self.sensor.set_sample_rate(SAMPLE_RATE)    # Sampling-Rate setzen
+        self.sensor.disable_debug_mode()            # Debug-Modus deaktivieren
         
-        # Temperatur-Offset ggf. setzen (z.B. für Gehäusewärme)
+        # Temperatur-Offset Ja/Nein
         if temp_offset:
-            self._sensor.set_temp_offset(int(round(temp_offset)))
+            self.sensor.set_temp_offset(int(round(temp_offset))) #  erwartet einen ganzzahligen Offset
+                # round(temp_offset) rundet den übergebenen Gleitkomma-Wert auf die nächste Ganzzahl
+                # int(...) wandelt das Ergebnis (das von round als Float kommt) in einen Integer um.
 
-        # --- Kalibrierungs-Status laden ----------------------------------------
+        # --- Kalibrierungs-Status laden ---
         # Prüfen, ob ein gespeicherter State existiert (Kalibrierung)
         if os.path.exists(STATE_FILE):
             with open(STATE_FILE) as f:
-                self._sensor.set_bsec_state(json.load(f))
+                # Erzeugt einen Context Manager.
+                # f ist das geöffnete File-Objekt.
+                self.sensor.set_bsec_state(json.load(f))
+                # "If the state file was written to file [...] for get_bsec_state() 
+                # then it will need to be read and processed from a string to an array of Int." -bme68x-python-library
+
                 print("State geladen →", STATE_FILE)
         else:
-            # Ohne State kann der Sensor nicht sinnvoll arbeiten
-            sys.exit("Fehler: Kein State gefunden – erst Burn‑in ausführen!")
+            # Ohne State kann der Sensor nicht in kurzer Zeit sinnvoll arbeiten und würde Stunden brauchen
+            sys.exit("Fehler: Kein State gefunden – erst Burn-in, oder so, ausführen!")
 
         # Letzten Datensatz und Zeitstempel initialisieren
-        self._last: dict | None = None   # letzter Datensatz
-        self._last_t: float = 0.0        # Zeitstempel des letzten Updates
+        self.last = None # Wird zum Dictionary/ HashMap(java)
+        self.lastT = 0.0
 
     # ----------------------------------------------------------------
-    def _update(self):
-        """Holt neue Daten vom Sensor, falls das Sampling-Intervall abgelaufen ist."""
+    def update(self):
+        # Holt neue Daten vom Sensor, falls das Sampling-Intervall abgelaufen ist.
         # Wenn die letzten Daten noch frisch genug sind, nichts tun
-        if time.time() - self._last_t < 3.5 and self._last:
+        if time.time() - self.lastT < 3.5 and self.last:
             return  # Daten sind aktuell
 
         t0 = time.time()  # Startzeit für Timeout
         while True:
-            d = self._sensor.get_bsec_data()  # Neue Daten vom Sensor holen
-            if d:
-                self._last, self._last_t = d, time.time()  # Daten und Zeitstempel speichern
+            d = self.sensor.get_bsec_data()  # Neue Daten vom Sensor holen
+                # liefert entweder ein Datentupel (truthy) oder None.
+            if d: # Sobald d nicht None ist
+                # kann zwischen „echten“ Daten und None unterscheiden.
+                self.last, self.lastT = d, time.time()  # Daten und Zeitstempel speichern
                 return
             if time.time() - t0 > MAX_WAIT_SEC:
                 # Wenn zu lange keine Daten kommen, Fehler werfen
@@ -62,39 +70,44 @@ class BME680:
     # ---- Öffentliche Lesemethoden ----------------------------------
     def read_temperature(self):
         # Holt aktuelle Temperatur vom Sensor (°C)
-        self._update()  # Frische Daten holen, falls nötig
-        return self._last["temperature"]  # Temperaturwert zurückgeben
+        self.update()  # Frische Daten holen, falls nötig
+        return self.last["temperature"]  # Temperaturwert zurückgeben
 
     def read_humidity(self):
         # Holt aktuelle Luftfeuchtigkeit (%) vom Sensor
-        self._update()
-        return self._last["humidity"]
+        self.update()
+        return self.last["humidity"]
 
     def read_pressure(self):
         # Holt aktuellen Luftdruck (hPa) vom Sensor
-        self._update()
-        return self._last["raw_pressure"]
+        self.update()
+        return self.last["raw_pressure"]
 
     def read_gas(self):
         # Holt aktuellen Gaswiderstand (Ohm) vom Sensor
-        self._update()
-        return self._last["raw_gas"]
+        self.update()
+        return self.last["raw_gas"]
 
     # ---- IAQ / eCO₂ --------------------------------------------------
     def read_iaq(self):
         # Holt aktuellen IAQ-Wert (Luftqualität) und Genauigkeit
         # Gibt (iaq, acc) zurück, aber nur echten Wert wenn acc >= 2, sonst None
-        self._update()
-        iaq = self._last["iaq"]
-        acc = self._last["iaq_accuracy"]
-        return (iaq if acc >= 2 else None, acc)
+        self.update()
+        iaq = self.last["iaq"]
+        acc = self.last["iaq_accuracy"]
+        return (iaq if acc >= 2 else None, acc) # Hübscher
+            # return ((iaq if acc >= 2 else None), acc)
+            # if acc >= 2:
+            #     return (iaq, acc)
+            # else:
+            #     return (None, acc)
 
     def read_eco2(self):
         # Holt aktuellen CO₂-Äquivalent-Wert und Genauigkeit
         # Gibt (eco2, acc) zurück, aber nur echten Wert wenn acc >= 2, sonst None
-        self._update()
-        eco2 = self._last["co2_equivalent"]
-        acc = self._last["co2_accuracy"]
+        self.update()
+        eco2 = self.last["co2_equivalent"]
+        acc = self.last["co2_accuracy"]
         return (eco2 if acc >= 2 else None, acc)
 
     # ---- Convenience-Strings ---------------------------------------
@@ -104,7 +117,7 @@ class BME680:
 
         iaq, acc = self.read_iaq()
         if acc < 2:
-            mins = int((time.time() - self._start_t) // 60)
+            mins = int((time.time() - self.startT) // 60)
             return f"Kalibrierung seit: {mins:02d} Minuten"
         return f"{iaq:.1f} (Acc {acc})"
 
@@ -114,7 +127,7 @@ class BME680:
         
         eco2, acc = self.read_eco2()
         if acc < 2:
-            mins = int((time.time() - self._start_t) // 60)
+            mins = int((time.time() - self.startT) // 60)
             return f"Kalibrierung seit: {mins:02d} Minuten"
         return f"{int(eco2)} ppm (Acc {acc})"
     
@@ -123,7 +136,7 @@ class BME680:
         # Kurzer String für LCD-Anzeige: IAQ oder Kalibrierung.
         iaq, acc = self.read_iaq()
         if acc < 2:
-            mins = int((time.time() - self._start_t) // 60)
+            mins = int((time.time() - self.startT) // 60)
             return "Kalibr. seit"
         return f"  :{int(iaq)}"
 
@@ -131,17 +144,28 @@ class BME680:
         # Kurzer String für LCD-Anzeige: CO₂ oder Kalibrierungszeit.
         eco2, acc = self.read_eco2()
         if acc < 2:
-            mins = int((time.time() - self._start_t) // 60)
+            mins = int((time.time() - self.startT) // 60)
             return f"{mins:02d}m"
         return f"{int(eco2)}"
     # ----------------------------------------------------------------
     def save_state(self):
         # Speichert den aktuellen Kalibrierungszustand des Sensors.
         # Nur wenn Accuracy == 3 (maximale Genauigkeit erreicht).
-        acc = self._last.get("iaq_accuracy", 0) if self._last else 0
+        acc = self.last.get("iaq_accuracy", 0) if self.last else 0
+            # Hohlt den letzten acc Stand, wenn dieser nicht existiert; Rückfall-Wert 0
+            # Wenn self.last nicht truthly ist (nicht existiert(None ist)), auch 0
+
         if acc == 3:
             with open(STATE_FILE, "w") as f:
-                json.dump(self._sensor.get_bsec_state(), f)
+                json.dump(self.sensor.get_bsec_state(), f)
+                # Erzeugt einen Context Manager.
+                # f ist das geöffnete File-Objekt.
+                    # öffnet die Datei im Schreib-Modus ("w", also alte Inhalte werden überschrieben)
+                    # wandelt das von get_bsec_state() zurückgelieferte Python-Objekt in einen JSON-String um
+                    # und schreibt diesen String komplett in die Datei.
+                # json.dump(obj, f) serialisiert obj und schreibt den JSON-Text in das geöffnete File-Objekt f.
+                    # Intern ruft es dabei f.write(...) auf.
+
             print("State gespeichert →", STATE_FILE)
         else:
             print("Accuracy < 3 – State nicht gespeichert.")
@@ -149,4 +173,4 @@ class BME680:
     def close(self):
         #Speichert den State und schließt die I2C-Verbindung.
         self.save_state()
-        self._sensor.close_i2c()
+        self.sensor.close_i2c()

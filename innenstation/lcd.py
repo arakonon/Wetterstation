@@ -6,11 +6,23 @@ from gpiozero import Button
 class LcdControl:
 
     def __init__(self):
-        # LCD initialisieren (I2C-Adresse, 16x2 Zeichen, Zeichensatz, Hintergrundbeleuchtung)
-        self.lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1,
-                           cols=16, rows=2, charmap='A00', auto_linebreaks=True, backlight_enabled=True)
+        # LCD initialisieren (I2C-Adresse, 16×2 Zeichen, Zeichensatz, Hintergrundbeleuchtung)
+        self.lcd = CharLCD(
+            i2c_expander='PCF8574',    # I2C-Port-Expander? auf dem LCD-Modul
+            address=0x27,              # I2C-Adresse 
+            port=1,                    # I2C-Bus-Nummer auf dem Raspberry Pi (meist Bus 1)
+            cols=16,                   # Anzahl der Zeichen pro Zeile (z.B. 16)
+            rows=2,                    # Anzahl der Zeilen (z.B. 2)
+            charmap='A00',             # Zeichensatz
+            auto_linebreaks=True,      # Automatischer Zeilenumbruch am Zeilenende
+            backlight_enabled=True     # Hintergrundbeleuchtung direkt anschalten
+        )
         
         # Eigene Zeichen als 8x5 Bitmaps(?)(siehe library) definieren (z.B. eCO2, ppm, AI, Sonne etc.)
+        # "The HD44780 supports up to 8 user created characters. 
+        # A character is defined by a 8x5 bitmap. 
+        # The bitmap should be a tuple of 8 numbers, each representing a 5 pixel row. 
+        # Each character is written to a specific location in CGRAM (numbers 0-7)." - RPLCD Documentation
         self.Carbondioxide_Symbol = [
             0b00110,
             0b00001,
@@ -192,6 +204,7 @@ class lcdCheck(threading.Thread):
         # pin: GPIO-Pin für den Button
         # anzahl_zustaende: Wie viele Zustände (z.B. Menüpunkte) durchgeschaltet werden können
         # debounce_time: Entprellzeit in Sekunden, um versehentliche Mehrfachauslösung zu verhindern
+        
         super().__init__()  # Thread initialisieren
         self._running = True  # Flag, ob der Thread laufen soll
         self.zustand = 0  # Aktueller Zustand (z.B. Menüpunkt)
