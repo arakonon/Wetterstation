@@ -1,4 +1,4 @@
-# datenbank.py
+from checkQuality import checkQuality
 import csv, datetime, math, time
 from pathlib import Path # Für zugriff auf Dateien
     # os; os.path wollte irgendwie nicht Funktionieren
@@ -36,6 +36,8 @@ class Datenbank:
             "temp_out", "hum_out", "uv_kategorie", "uv_raw", "uv_api"
         ]
 
+        self.check = checkQuality()
+
 
     # Hauptfunktion zum Puffern und Schreiben der Messwerte
     def logRow(self, sensor, tempOut=None, humOut=None, uvKat=None, uvRaw=None, uvApi=None):  
@@ -48,13 +50,13 @@ class Datenbank:
         temp = sensor.read_temperature()
         valid = False
 
-        if iaq is not None and not math.isnan(iaq): # math.insan prüft, ob der übergebene Wert „Not a Number“ (NaN) ist; Für rechnung später
+        if self.check.is_plausible(iaq, 0, 500):
             self.sumIaq += iaq;    valid = True
-        if eco2 is not None and not math.isnan(eco2):
+        if self.check.is_plausible(eco2, 0, 5000):
             self.sumEco2 += eco2;  valid = True
-        if hum is not None and not math.isnan(hum):
+        if self.check.is_plausible(hum, 10, 90):
             self.sumHum += hum;    valid = True
-        if temp is not None and not math.isnan(temp):
+        if self.check.is_plausible(temp, 9, 40):
             self.sumTemp += temp;  valid = True
         if valid:
             self.count += 1  # Nur wenn mindestens ein Wert gültig ist
@@ -62,16 +64,11 @@ class Datenbank:
 
         # Neueste Außenwerte merken
         # Müssen nicht gemittelt werden, weil der Esp auch nur jede 5 Minuten sendet.
-        if tempOut is not None:
-            self.extTemp = tempOut
-        if humOut is not None:
-            self.extHum = humOut
-        if uvKat is not None:
-            self.extUv = uvKat
-        if uvRaw is not None:
-            self.extUvRaw = uvRaw
-        if uvApi is not None:
-            self.extUvApi = uvApi
+        self.extTemp = tempOut
+        self.extHum = humOut
+        self.extUv = uvKat
+        self.extUvRaw = uvRaw
+        self.extUvApi = uvApi
 
         # Prüfen, ob das Intervall abgelaufen ist – nur dann schreiben
         now = time.time()
@@ -102,6 +99,7 @@ class Datenbank:
 
             # Pythons ternärer Ausdruck (inline-if)
             # Round nur, damit max 2 Nachkommastellen
+            # extra Check für "" und nicht "-"
             "" if self.extTemp is None else round(self.extTemp, 2),
                 # Wenn self.extTemp is None, wird "" (leerer String) in die CSV-Zeile geschrieben.
                 # Ansonsten round(self.extTemp, 2).

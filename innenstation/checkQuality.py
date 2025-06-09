@@ -1,5 +1,6 @@
 #from BME680 import BME680
 #import time
+import math
 
 class checkQuality:
 
@@ -65,7 +66,7 @@ class checkQuality:
     def check_acc(self):
         # Frische IAQ-Werte holen und prüfen, ob Kalibrierung abgeschlossen ist
         checkQuality.update_values_check_acc(self)
-        if self.iaq_acc < 2:
+        if self.iaq_acc <= 2:
             # Noch nicht kalibriert
             return True
         else:
@@ -79,4 +80,24 @@ class checkQuality:
             return True
         else:
             return False
+        
+    def is_plausible(self, value, minVal, maxVal):
+        try:
+            # Prüft, ob der Wert None ist (also gar kein Wert vorliegt)
+            # oder ob der Wert ein float ist UND nan ist.
+            # isinstance(value, float): True, wenn value ein float ist
+            # math.isnan(value): True, wenn value ein nan ist
+            # Das zweite Teilstück wird NUR geprüft wenn value wirklich float
+            if value is None or (isinstance(value, float) and math.isnan(value)):
+                # Falls einer der beiden Fälle zutrifft, ist der Wert unplausibel
+                return False
+            # Wenn value kein None und kein NaN ist, prüfe, ob der Wert im erlaubten Bereich liegt
+            # minVal <= value <= maxVal: True, wenn value zwischen minVal und maxVal liegt (inklusive)
+            return minVal <= value <= maxVal
+        except Exception as fehlerrr:
+            # Falls beim Vergleich ein Fehler auftritt (z.B. value ist ein String), gib eine Fehlermeldung aus
+            print("is_plausible Fehler:", fehlerrr)
+            # und gib False zurück, weil der Wert nicht plausibel geprüft werden konnte
+            return False
+
 

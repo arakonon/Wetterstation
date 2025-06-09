@@ -166,7 +166,7 @@ class LcdControl:
     def display_measurement(self, temperature, humidity, iaq_str, eco2_str):
         # Zeigt Messdaten (Temp, Feuchte, IAQ, eCO2) mit Symbolen auf LCD an
         self.display_text(f" {temperature:.1f}°C  {humidity:.1f}%rF",
-                    iaq_str + "    " + eco2_str)
+                    iaq_str + "     " + eco2_str)
         
         # Symbole und Einheiten gezielt auf bestimmte Positionen setzen
         self.lcd.cursor_pos = (1, 0)
