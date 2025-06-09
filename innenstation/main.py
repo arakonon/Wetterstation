@@ -44,7 +44,7 @@ def main():
             # LCD-Ausgabe je nach Button-Zustand (Menü)
             if button.zustand == 0:
                 lcd.lcd.backlight_enabled = True  # Hintergrundbeleuchtung an
-                if acc <= 3:
+                if acc < 3:
                     # Sensor noch nicht kalibriert: Kalibrierungsanzeige
                     lcd.display_calibration(bme.read_temperature(), bme.read_humidity(),
                                             bme.iaq_str_LCD(), bme.eco2_str_LCD())

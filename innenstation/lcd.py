@@ -181,7 +181,7 @@ class LcdControl:
         self.display_eco2()
         self.lcd.cursor_pos = (1, 14)
         self.display_pp()
-        self.lcd.cursor_pos(1, 15)
+        self.lcd.cursor_pos = (1, 15)
         self.lcd.write_string("m")
     
     def sunSymbol (self, symbol):

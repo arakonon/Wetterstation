@@ -94,7 +94,7 @@ void setup() {
   // uint16_t ist ein unsigned 16-Bit Ganzzahltyp (0…65535) aus <stdint.h>?
   int kategorie = getSonneKategorie(rawUV);
 
-  // Für ganze Zahlen (uint16_t, int) reicht snprintf() mit "%d" völlig aus:
+  // Für ganze Zahlen (uint16_t, int) reicht snprintf() mit "%d" aus:
   snprintf(buf, sizeof(buf), "%d", rawUV);
   client.publish("esp32/sun_raw", buf, true);
 
