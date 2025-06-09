@@ -186,7 +186,7 @@ class LcdControl:
     
     def sunSymbol (self, symbol):
         # Zeigt das passende Sonnen-Symbol je nach Wert an (1-4)
-        self.lcd.cursor_pos = (0,14)
+        self.lcd.cursor_pos = (0,15)
         if symbol == 1:
             self.display_sun1()
         elif symbol == 2:
