@@ -4,7 +4,7 @@ import math
 
 class checkQuality:
 
-    def __init__(self, bmee):
+    def __init__(self, bmee=None):
         self.bme = bmee  # Sensorobjekt speichern
         #self.mittelTimer = 15  # (Optional) Timer für Mittelwertbildung
 

@@ -39,17 +39,17 @@ def main():
             eco2, eco2_acc = bme.read_eco2()
             eco2 = eco2 if check.is_plausible(eco2, 0, 5000) else "-"
 
-            iaq_string_LCD = bme.iaq_str_LCD
+            iaq_string_LCD = bme.iaq_str_LCD()
             iaq_string_LCD = iaq_string_LCD if iaq != "-" else "---"
 
-            eco2_string_LCD = bme.eco2_str_LCD
+            eco2_string_LCD = bme.eco2_str_LCD()
             eco2_string_LCD = eco2_string_LCD if eco2 != "-" else "---"
 
             tAußen = esp.get("temperature")                # Außentemperatur
-            tAußen = tAußen if check.is_plausible(tAußen, -40, 60) else "-" # Plausibel?
+            tAußen = tAußen if check.is_plausible(tAußen, -15, 60) else "-" # Plausibel?
 
             hAußen = esp.get("humidity")                   # Außen rF
-            hAußen = hAußen if check.is_plausible(hAußen, 0, 100) else "-" # Plausibel?
+            hAußen = hAußen if check.is_plausible(hAußen, 10, 90) else "-" # Plausibel?
             
             tATxt = esp.get_str("temperature", unit="°C") if tAußen != "-" else "---"  # Außentemperatur als String
             hATxt = esp.get_str("humidity", unit="%rF") if hAußen != "-" else "---" # Außenfeuchte als String
@@ -64,7 +64,7 @@ def main():
             uv = uv if check.is_plausible(uv, 0, 11) else "-"
             
             temp_innen = bme.read_temperature()            # Temperatur innen
-            temp_innen = temp_innen if check.is_plausible(temp_innen, 9, 40) else "-" # Plausibel?
+            temp_innen = temp_innen if check.is_plausible(temp_innen, 5, 40) else "-" # Plausibel?
             
             hum_innen = bme.read_humidity()                  # rF innen
             hum_innen = hum_innen if check.is_plausible(hum_innen, 10, 90) else "-" # Plausibel?
@@ -78,7 +78,7 @@ def main():
                 if acc < 3:
                     # Sensor noch nicht kalibriert: Kalibrierungsanzeige
                     lcd.display_calibration(temp_innen, hum_innen,
-                                            iaq_string_LCD, eco2_string_LCD)
+                                            bme.iaq_str_LCD(), bme.eco2_str_LCD()) # Für Kalibr. Anzeige unge"plausibilisiert"
                 else:
                     # Sensor kalibriert: Messwerte anzeigen
                     lcd.display_measurement(temp_innen, hum_innen,
@@ -99,8 +99,8 @@ def main():
                 lcd.lcd.backlight_enabled = False
 
             # Terminal-Ausgabe (Debug/Monitoring)
-            print("\nTemperatur: %0.1f °C" % bme.read_temperature() + temp_innen)
-            print("Luftfeuchtigkeit: %0.1f %%" % bme.read_humidity() + hum_innen)
+            print("\nTemperatur: %0.1f °C" % temp_innen)
+            print("Luftfeuchtigkeit: %0.1f %%" % hum_innen)
             print("Luftqualität:", bme.iaq_str())
             print("CO₂-Äquivalent:", bme.eco2_str()) # Plausibilitätsprüfung für Bugfixing weggelassen
             if not esp.is_alive():

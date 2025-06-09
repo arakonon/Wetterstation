@@ -100,14 +100,15 @@ class Datenbank:
             # Pythons ternärer Ausdruck (inline-if)
             # Round nur, damit max 2 Nachkommastellen
             # extra Check für "" und nicht "-"
-            "" if self.extTemp is None else round(self.extTemp, 2),
+            "" if self.extTemp is None or not isinstance(self.extTemp, (int, float)) else round(self.extTemp, 2),
                 # Wenn self.extTemp is None, wird "" (leerer String) in die CSV-Zeile geschrieben.
+                # und wenn extTemp nicht int oder float ist ("---")
                 # Ansonsten round(self.extTemp, 2).
             # Das gleiche hier:
-            "" if self.extHum is None else round(self.extHum, 2),
-            "" if self.extUv is None else round(self.extUv, 2),
-            "" if self.extUvRaw is None else round(self.extUvRaw, 2),
-            "" if self.extUvApi is None else round(self.extUvApi, 2)
+            "" if self.extHum is None or not isinstance(self.extHum, (int, float)) else round(self.extHum, 2),
+            "" if self.extUv is None or not isinstance(self.extUv, (int, float)) else round(self.extUv, 2),
+            "" if self.extUvRaw is None or not isinstance(self.extUvRaw, (int, float)) else round(self.extUvRaw, 2),
+            "" if self.extUvApi is None or not isinstance(self.extUvApi, (int, float)) else round(self.extUvApi, 2)
         ]
 
         # CSV-Datei öffnen und ggf. Header schreiben
