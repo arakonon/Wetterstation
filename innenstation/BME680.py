@@ -95,7 +95,7 @@ class BME680:
         self.update()
         iaq = self.last["iaq"]
         acc = self.last["iaq_accuracy"]
-        return (iaq if acc >= 2 else None, acc) # Hübscher
+        return (iaq if acc >= 2 else None, acc) # Schon ab accuracy 2 in der Konsole ausgeben
             # return ((iaq if acc >= 2 else None), acc)
             # if acc >= 2:
             #     return (iaq, acc)
@@ -116,9 +116,9 @@ class BME680:
         # Zeigt Kalibrierungsdauer, falls accuracy < 2.
 
         iaq, acc = self.read_iaq()
-        if acc < 2:
+        if acc < 1:
             mins = int((time.time() - self.startT) // 60)
-            return f"Kalibrierung seit: {mins:02d} Minuten"
+            return f"Acc: {int(acc)} Kalibrierung seit: {mins:02d} Minuten"
         return f"{iaq:.1f} (Acc {acc})"
 
     def eco2_str(self):
@@ -126,24 +126,24 @@ class BME680:
         # Zeigt Kalibrierungsdauer, falls accuracy < 2.
         
         eco2, acc = self.read_eco2()
-        if acc < 2:
+        if acc < 1:
             mins = int((time.time() - self.startT) // 60)
-            return f"Kalibrierung seit: {mins:02d} Minuten"
+            return f"Acc: {int(acc)} Kalibrierung seit: {mins:02d} Minuten"
         return f"{int(eco2)} ppm (Acc {acc})"
     
     #---- Convenience-Strings für LCD -------------------------------
     def iaq_str_LCD(self):
         # Kurzer String für LCD-Anzeige: IAQ oder Kalibrierung.
         iaq, acc = self.read_iaq()
-        if acc < 2:
+        if acc <= 2:
             mins = int((time.time() - self.startT) // 60)
             return "Kalibr. seit"
-        return f"  :{int(iaq)}"
+        return f"  {int(iaq)}"
 
     def eco2_str_LCD(self):
         # Kurzer String für LCD-Anzeige: CO₂ oder Kalibrierungszeit.
         eco2, acc = self.read_eco2()
-        if acc < 2:
+        if acc <= 2:
             mins = int((time.time() - self.startT) // 60)
             return f"{mins:02d}m"
         return f"{int(eco2)}"
