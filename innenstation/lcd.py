@@ -163,11 +163,13 @@ class LcdControl:
         self.display_text(f"{temperature:.1f}°C  {humidity:.1f}%",
                     iaq_str + " " + eco2_str)
 
-    def display_measurement(self, temperature, humidity, iaq_str, eco2_str):
+    def display_measurement(self, temperature, humidity, iaq_str, eco2_str, eco2):
         # Zeigt Messdaten (Temp, Feuchte, IAQ, eCO2) mit Symbolen auf LCD an
         self.display_text(f" {temperature:.1f}°C  {humidity:.1f}%rF",
-                    iaq_str + "     " + eco2_str)
-        
+                    iaq_str + "      " + eco2_str)
+        ppm_placement = 14 if eco2 > 999 else 13 if eco2 > 99 else 12 # Für den Ort, an dem das Symbol "ppm" auf dem LCD angezeigt wird.
+
+
         # Symbole und Einheiten gezielt auf bestimmte Positionen setzen
         self.lcd.cursor_pos = (1, 0)
         self.display_ai()
@@ -179,9 +181,11 @@ class LcdControl:
         self.lcd.write_string("C")
         self.lcd.cursor_pos = (1, 8)
         self.display_eco2()
-        self.lcd.cursor_pos = (1, 14)
+        self.lcd.cursor_pos = (1, 9)
+        self.lcd.write_string(":")
+        self.lcd.cursor_pos = (1, ppm_placement)
         self.display_pp()
-        self.lcd.cursor_pos = (1, 15)
+        self.lcd.cursor_pos = (1, (ppm_placement + 1))
         self.lcd.write_string("m")
     
     def sunSymbol (self, symbol):

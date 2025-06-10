@@ -18,7 +18,7 @@ button = lcdCheck()                 # Thread für Button-Steuerung (Menüumschal
 speicher = Datenbank()              # Datenbank/Logger für Mittelwerte
 esp = EspAußen(host="127.0.0.1", timeout=600)  # ESP32 Außenstation
 mqtt = MQTTPublisher()              # MQTT Publisher (für OpenHAB)
-uvApi = UvApiClient()               # UV-API-Client für aktuelle UV-Werte
+uvApi = UvApiClient(bme)               # UV-API-Client für aktuelle UV-Werte
 check = checkQuality()              # Hier nur für is_plausible()
 def main():
     # Initialisierung und Start aller Threads und Komponenten
@@ -44,6 +44,7 @@ def main():
 
             eco2_string_LCD = bme.eco2_str_LCD()
             eco2_string_LCD = eco2_string_LCD if eco2 != "-" else "---"
+             # ("eco2_string_LCD = bme.eco2_str_LCD() if eco2 != "-" else "---""" müsste auch gehen, so wie jetzt gehts halt aber auch)
 
             tAußen = esp.get("temperature")                # Außentemperatur
             tAußen = tAußen if check.is_plausible(tAußen, -15, 60) else "-" # Plausibel?
@@ -82,7 +83,7 @@ def main():
                 else:
                     # Sensor kalibriert: Messwerte anzeigen
                     lcd.display_measurement(temp_innen, hum_innen,
-                                            iaq_string_LCD, eco2_string_LCD)
+                                            iaq_string_LCD, eco2_string_LCD, eco2)
                     
             elif button.zustand == 1:
                 lcd.lcd.backlight_enabled = True
