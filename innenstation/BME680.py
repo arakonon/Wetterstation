@@ -12,9 +12,12 @@ class BME680:
     def __init__(
             self, 
             addr: int = 0x77, 
-            temp_offset: float = 0.0):
+            temp_offset: float = 0.0,
+            acc_wert_lcd = 2):
         # Startzeit merken, um Kalibrierungsdauer zu berechnen
-        self.startT = time.time()        
+        self.startT = time.time()   
+
+        self.acc_wert_lcd = acc_wert_lcd     
 
         # --- Sensor & BSEC Initialisierung ---
         # Sensor-Objekt erzeugen, Adresse und BSEC-Modus setzen
@@ -95,7 +98,8 @@ class BME680:
         self.update()
         iaq = self.last["iaq"]
         acc = self.last["iaq_accuracy"]
-        return (iaq if acc >= 2 else None, acc) # Schon ab accuracy 2 in der Konsole ausgeben
+        return (iaq if acc >= 2 else iaq, acc) # Schon ab accuracy 2 in der Konsole ausgeben
+                                               # ACHTUNG eig (iaq if acc >= 2 else None, acc) aber für debug so
             # return ((iaq if acc >= 2 else None), acc)
             # if acc >= 2:
             #     return (iaq, acc)
@@ -108,7 +112,7 @@ class BME680:
         self.update()
         eco2 = self.last["co2_equivalent"]
         acc = self.last["co2_accuracy"]
-        return (eco2 if acc >= 2 else None, acc)
+        return (eco2 if acc >= 2 else eco2, acc) # ACHTUNG, eig (eco2 if acc >= 2 else None, acc) aber für debug so
 
     # ---- Convenience-Strings ---------------------------------------
     def iaq_str(self):
@@ -135,7 +139,7 @@ class BME680:
     def iaq_str_LCD(self):
         # Kurzer String für LCD-Anzeige: IAQ oder Kalibrierung.
         iaq, acc = self.read_iaq()
-        if acc <= 2:
+        if acc <= self.acc_wert_lcd:
             mins = int((time.time() - self.startT) // 60)
             return "Kalibr. seit"
         return f"  {int(iaq)}"
@@ -143,7 +147,7 @@ class BME680:
     def eco2_str_LCD(self):
         # Kurzer String für LCD-Anzeige: CO₂ oder Kalibrierungszeit.
         eco2, acc = self.read_eco2()
-        if acc <= 2:
+        if acc <= self.acc_wert_lcd:
             mins = int((time.time() - self.startT) // 60)
             return f"{mins:02d}m"
         return f"{int(eco2)}"

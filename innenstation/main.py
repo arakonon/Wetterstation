@@ -11,7 +11,9 @@ import time
 import threading
 
 # Sensor- und Steuerungsobjekte initialisieren
-bme = BME680(temp_offset=-0.1)      # BME680-Sensor mit Temperatur-Offset
+display_acc = 3 # Standart auf 3, zum testen ohne cal. LCD auf 0
+    # acc_wert_lcd standart auf 2, zum testen auf -1
+bme = BME680(temp_offset=-0.1,acc_wert_lcd=2)      # BME680-Sensor mit Temperatur-Offset
 ampel = Ampel(bme)                  # Ampel-Logik mit Sensor
 lcd = LcdControl()                  # LCD-Anzeige
 button = lcdCheck()                 # Thread für Button-Steuerung (Menüumschaltung)
@@ -35,6 +37,7 @@ def main():
             # Sensorwerte holen (innen & außen)
             iaq, acc = bme.read_iaq()  # IAQ-Wert (und Genauigkeit)
             iaq = iaq if check.is_plausible(iaq, 0, 500) else "-"
+            print("[DEBUG] raw iaq, eco2 = " + str(bme.read_iaq()) + str(bme.read_eco2()))
             
             eco2, eco2_acc = bme.read_eco2()
             eco2 = eco2 if check.is_plausible(eco2, 0, 5000) else "-"
@@ -76,7 +79,7 @@ def main():
             # LCD-Ausgabe je nach Button-Zustand (Menü)
             if button.zustand == 0:
                 lcd.lcd.backlight_enabled = True  # Hintergrundbeleuchtung an
-                if acc < 3:
+                if acc < display_acc:
                     # Sensor noch nicht kalibriert: Kalibrierungsanzeige
                     lcd.display_calibration(temp_innen, hum_innen,
                                             bme.iaq_str_LCD(), bme.eco2_str_LCD()) # Für Kalibr. Anzeige unge"plausibilisiert"
