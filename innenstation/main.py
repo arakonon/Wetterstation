@@ -2,7 +2,7 @@
 
 from lcd import LcdControl, lcdCheck
 from BME680 import BME680
-from Mqtt import EspAußen, MQTTPublisher
+from Mqtt import EspAußen, MqttPublisher
 from Ampel import Ampel
 from Datenbank import Datenbank
 from UvApi import UvApiClient
@@ -19,7 +19,7 @@ lcd = LcdControl()                  # LCD-Anzeige
 button = lcdCheck()                 # Thread für Button-Steuerung (Menüumschaltung)
 speicher = Datenbank()              # Datenbank/Logger für Mittelwerte
 esp = EspAußen(host="127.0.0.1", timeout=600)  # ESP32 Außenstation
-mqtt = MQTTPublisher()              # MQTT Publisher (für OpenHAB)
+mqtt = MqttPublisher()            # MQTT Publisher (für OpenHAB)
 uvApi = UvApiClient(bme)               # UV-API-Client für aktuelle UV-Werte
 check = checkQuality()              # Hier nur für isPlausible()
 def main():
@@ -29,6 +29,7 @@ def main():
     ampelThread.start()
     button.start()  # Button-Thread starten (für Menüumschaltung)
     nextLog = time.time() + 30 # Erster Log nach 30 Sekunden
+    wasKalib = False
     print("warte auf Sensor-Daten")
 
     # Haupt-Loop: läuft bis zum Abbruch (Strg+C)
@@ -79,11 +80,12 @@ def main():
             # LCD-Ausgabe je nach Button-Zustand (Menü)
             if button.zustand == 0:
                 lcd.lcd.backlight_enabled = True  # Hintergrundbeleuchtung an
-                if acc < displayAcc:
+                if acc < displayAcc and not wasKalib:
                     # Sensor noch nicht kalibriert: Kalibrierungsanzeige
                     lcd.displayCalibration(tempInnen, humInnen,
                                             bme.iaqStrLCD(), bme.eco2StrLCD()) # Für Kalibr. Anzeige unge"plausibilisiert"
                 else:
+                    wasKalib = True
                     # Sensor kalibriert: Messwerte anzeigen
                     lcd.displayMeasurement(tempInnen, humInnen,
                                             iaqStringLcd, eco2StringLcd, eco2)
