@@ -8,16 +8,16 @@ class checkQuality:
         self.bme = bmee  # Sensorobjekt speichern
         #self.mittelTimer = 15  # (Optional) Timer für Mittelwertbildung
 
-    def update_values(self):
+    def updateValues(self):
         # Holt aktuelle Messwerte vom Sensor und speichert sie als Attribute
-        self.iaq, self.iaq_acc = self.bme.read_iaq()      # IAQ-Wert + Genauigkeit
-        self.eco2, self.eco2_acc  = self.bme.read_eco2()     # eCO2-Wert + Genauigkeit
-        self.hum = self.bme.read_humidity()               # Luftfeuchtigkeit
-        self.temp = self.bme.read_temperature()           # Temperatur
+        self.iaq, self.iaq_acc = self.bme.readIaq()      # IAQ-Wert + Genauigkeit
+        self.eco2, self.eco2_acc  = self.bme.readEco2()     # eCO2-Wert + Genauigkeit
+        self.hum = self.bme.readHumidity()               # Luftfeuchtigkeit
+        self.temp = self.bme.readTemperature()           # Temperatur
 
-    def update_values_check_acc(self):
+    def updateValuesCheckAcc(self):
         # Holt nur IAQ-Wert und Genauigkeit (z.B. für Kalibrierungsschleife), einfach so
-        self.iaq, self.iaq_acc = self.bme.read_iaq()
+        self.iaq, self.iaq_acc = self.bme.readIaq()
 
     def accÜber1(self):
         # True, solange die IAQ-Genauigkeit < 2 ist (Kalibrierung läuft)
@@ -26,7 +26,7 @@ class checkQuality:
         else:
             return False
 
-    def check_IAQ_quality(self):
+    def checkIaqQuality(self):
         # Prüft die Luftqualität anhand des IAQ-Werts (sofern Kalibrierung ok)
         if self.iaq_acc >= 2:
             # IAQ > 151: sehr schlecht (rot), >101: mittel (gelb), sonst gut (grün)
@@ -37,10 +37,10 @@ class checkQuality:
             else:
                 return 2  # Grün
         else:
-            print("[check_IAQ_quality] Kalibrierung läuft …")
+            print("[checkIaqQquality] Kalibrierung läuft …")
             return None
 
-    def check_eCO2_quality(self):
+    def checkEco2Quality(self):
         # Prüft die eCO2-Qualität (sofern Kalibrierung ok)
         if self.eco2_acc >= 2:
             # eCO2 > 2000: sehr schlecht (rot), >1001: mittel (gelb), sonst gut (grün)
@@ -54,7 +54,7 @@ class checkQuality:
             print("[check_air_quality] Kalibrierung läuft …")
             return None
         
-    def check_humidity_quality(self):
+    def checkHumidityQuality(self):
         # Prüft die Luftfeuchtigkeit (ohne Kalibrierung)
         if self.hum > 70:
             return 0  # Rot
@@ -63,17 +63,17 @@ class checkQuality:
         else:
             return 2  # Grün
         
-    def check_acc(self):
+    def checkAcc(self):
         # Frische IAQ-Werte holen und prüfen, ob Kalibrierung abgeschlossen ist
-        checkQuality.update_values_check_acc(self)
+        checkQuality.updateValuesCheckAcc(self)
         if self.iaq_acc <= 2:
             # Noch nicht kalibriert
             return True
         else:
-            print("[check_acc] Kalibrierung abgeschlossen.")
+            print("[checkAcc] Kalibrierung abgeschlossen.")
             return False
         
-    def check_emergency(self):
+    def checkEmergency(self):
         # Prüft auf Notfallbedingungen (sehr schlechte Werte)
         # eCO2 > 1999, IAQ > 249, Temperatur > 39°C, Luftfeuchte > 79%
         if self.eco2 > 1999 or self.iaq > 249 or self.temp > 39 or self.hum > 79:
@@ -81,7 +81,7 @@ class checkQuality:
         else:
             return False
         
-    def is_plausible(self, value, minVal, maxVal):
+    def isPlausible(self, value, minVal, maxVal):
         try:
             # Prüft, ob der Wert None ist (also gar kein Wert vorliegt)
             # oder ob der Wert ein float ist UND nan ist.
@@ -96,7 +96,7 @@ class checkQuality:
             return minVal <= value <= maxVal
         except Exception as fehlerrr:
             # Falls beim Vergleich ein Fehler auftritt (z.B. value ist ein String), gib eine Fehlermeldung aus
-            print("is_plausible Fehler:", fehlerrr)
+            print("isPlausible Fehler:", fehlerrr)
             # und gib False zurück, weil der Wert nicht plausibel geprüft werden konnte
             return False
 

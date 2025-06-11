@@ -47,7 +47,7 @@ class BME680:
             sys.exit("Fehler: Kein State gefunden – erst Burn-in, oder so, ausführen!")
 
         # Letzten Datensatz und Zeitstempel initialisieren
-        self.last = None # Wird zum Dictionary/ HashMap(java)
+        self.last = None # Wird zum Dictionary/ HashMap(java) wieso?
         self.lastT = 0.0
 
     # ----------------------------------------------------------------
@@ -71,28 +71,28 @@ class BME680:
             time.sleep(0.05)  # Kurz warten und erneut versuchen
 
     # ---- Öffentliche Lesemethoden ----------------------------------
-    def read_temperature(self):
+    def readTemperature(self):
         # Holt aktuelle Temperatur vom Sensor (°C)
         self.update()  # Frische Daten holen, falls nötig
         return self.last["temperature"]  # Temperaturwert zurückgeben
 
-    def read_humidity(self):
+    def readHumidity(self):
         # Holt aktuelle Luftfeuchtigkeit (%) vom Sensor
         self.update()
         return self.last["humidity"]
 
-    def read_pressure(self):
+    def readPressure(self):
         # Holt aktuellen Luftdruck (hPa) vom Sensor
         self.update()
         return self.last["raw_pressure"]
 
-    def read_gas(self):
+    def readGas(self):
         # Holt aktuellen Gaswiderstand (Ohm) vom Sensor
         self.update()
         return self.last["raw_gas"]
 
     # ---- IAQ / eCO₂ --------------------------------------------------
-    def read_iaq(self):
+    def readIaq(self):
         # Holt aktuellen IAQ-Wert (Luftqualität) und Genauigkeit
         # Gibt (iaq, acc) zurück, aber nur echten Wert wenn acc >= 2, sonst None
         self.update()
@@ -106,7 +106,7 @@ class BME680:
             # else:
             #     return (None, acc)
 
-    def read_eco2(self):
+    def readEco2(self):
         # Holt aktuellen CO₂-Äquivalent-Wert und Genauigkeit
         # Gibt (eco2, acc) zurück, aber nur echten Wert wenn acc >= 2, sonst None
         self.update()
@@ -115,44 +115,44 @@ class BME680:
         return (eco2 if acc >= 2 else eco2, acc) # ACHTUNG, eig (eco2 if acc >= 2 else None, acc) aber für debug so
 
     # ---- Convenience-Strings ---------------------------------------
-    def iaq_str(self):
+    def iaqStr(self):
         # Gibt einen formatierten String für den IAQ-Wert zurück.
         # Zeigt Kalibrierungsdauer, falls accuracy < 2.
 
-        iaq, acc = self.read_iaq()
+        iaq, acc = self.readIaq()
         if acc < 1:
             mins = int((time.time() - self.startT) // 60)
             return f"Acc: {int(acc)} Kalibrierung seit: {mins:02d} Minuten"
         return f"{iaq:.1f} (Acc {acc})"
 
-    def eco2_str(self):
+    def eco2Str(self):
         # Gibt einen formatierten String für den eCO₂-Wert zurück.
         # Zeigt Kalibrierungsdauer, falls accuracy < 2.
         
-        eco2, acc = self.read_eco2()
+        eco2, acc = self.readEco2()
         if acc < 1:
             mins = int((time.time() - self.startT) // 60)
             return f"Acc: {int(acc)} Kalibrierung seit: {mins:02d} Minuten"
         return f"{int(eco2)} ppm (Acc {acc})"
     
     #---- Convenience-Strings für LCD -------------------------------
-    def iaq_str_LCD(self):
+    def iaqStrLCD(self):
         # Kurzer String für LCD-Anzeige: IAQ oder Kalibrierung.
-        iaq, acc = self.read_iaq()
+        iaq, acc = self.readIaq()
         if acc <= self.acc_wert_lcd:
             mins = int((time.time() - self.startT) // 60)
             return "Kalibr. seit"
         return f"  {int(iaq)}"
 
-    def eco2_str_LCD(self):
+    def eco2StrLCD(self):
         # Kurzer String für LCD-Anzeige: CO₂ oder Kalibrierungszeit.
-        eco2, acc = self.read_eco2()
+        eco2, acc = self.readEco2()
         if acc <= self.acc_wert_lcd:
             mins = int((time.time() - self.startT) // 60)
             return f"{mins:02d}m"
         return f"{int(eco2)}"
     # ----------------------------------------------------------------
-    def save_state(self):
+    def saveState(self):
         # Speichert den aktuellen Kalibrierungszustand des Sensors.
         # Nur wenn Accuracy == 3 (maximale Genauigkeit erreicht).
         acc = self.last.get("iaq_accuracy", 0) if self.last else 0
@@ -176,5 +176,5 @@ class BME680:
 
     def close(self):
         #Speichert den State und schließt die I2C-Verbindung.
-        self.save_state()
+        self.saveState()
         self.sensor.close_i2c()

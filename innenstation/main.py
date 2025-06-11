@@ -11,7 +11,7 @@ import time
 import threading
 
 # Sensor- und Steuerungsobjekte initialisieren
-display_acc = 3 # Standart auf 3, zum testen ohne cal. LCD auf 0
+displayAcc = 3 # Standart auf 3, zum testen ohne cal. LCD auf 0
     # acc_wert_lcd standart auf 2, zum testen auf -1
 bme = BME680(temp_offset=-0.1,acc_wert_lcd=2)      # BME680-Sensor mit Temperatur-Offset
 ampel = Ampel(bme)                  # Ampel-Logik mit Sensor
@@ -21,57 +21,57 @@ speicher = Datenbank()              # Datenbank/Logger für Mittelwerte
 esp = EspAußen(host="127.0.0.1", timeout=600)  # ESP32 Außenstation
 mqtt = MQTTPublisher()              # MQTT Publisher (für OpenHAB)
 uvApi = UvApiClient(bme)               # UV-API-Client für aktuelle UV-Werte
-check = checkQuality()              # Hier nur für is_plausible()
+check = checkQuality()              # Hier nur für isPlausible()
 def main():
     # Initialisierung und Start aller Threads und Komponenten
     ampel.ampelt_test()  # Teste die Ampelsteuerung (LEDs durchschalten)
-    ampel_thread = threading.Thread(target=ampel.start)  # Ampel in eigenem Thread starten
-    ampel_thread.start()
+    ampelThread = threading.Thread(target=ampel.start)  # Ampel in eigenem Thread starten
+    ampelThread.start()
     button.start()  # Button-Thread starten (für Menüumschaltung)
-    next_log = time.time() + 30 # Erster Log nach 30 Sekunden
+    nextLog = time.time() + 30 # Erster Log nach 30 Sekunden
     print("warte auf Sensor-Daten")
 
     # Haupt-Loop: läuft bis zum Abbruch (Strg+C)
     try:
         while True:
             # Sensorwerte holen (innen & außen)
-            iaq, acc = bme.read_iaq()  # IAQ-Wert (und Genauigkeit)
-            iaq = iaq if check.is_plausible(iaq, 0, 500) else "-"
-            print("[DEBUG] raw iaq, eco2 = " + str(bme.read_iaq()) + str(bme.read_eco2()))
+            iaq, acc = bme.readIaq()  # IAQ-Wert (und Genauigkeit)
+            iaq = iaq if check.isPlausible(iaq, 0, 500) else "-"
+            print("[DEBUG] raw iaq, eco2 = " + str(bme.readIaq()) + str(bme.readEco2()))
             
-            eco2, eco2_acc = bme.read_eco2()
-            eco2 = eco2 if check.is_plausible(eco2, 0, 5000) else "-"
+            eco2, eco2Acc = bme.readEco2()
+            eco2 = eco2 if check.isPlausible(eco2, 0, 5000) else "-"
 
-            iaq_string_LCD = bme.iaq_str_LCD()
-            iaq_string_LCD = iaq_string_LCD if iaq != "-" else "---"
+            iaqStringLcd = bme.iaqStrLCD()
+            iaqStringLcd = iaqStringLcd if iaq != "-" else "---"
 
-            eco2_string_LCD = bme.eco2_str_LCD()
-            eco2_string_LCD = eco2_string_LCD if eco2 != "-" else "---"
-             # ("eco2_string_LCD = bme.eco2_str_LCD() if eco2 != "-" else "---""" müsste auch gehen, so wie jetzt gehts halt aber auch)
+            eco2StringLcd = bme.eco2StrLCD()
+            eco2StringLcd = eco2StringLcd if eco2 != "-" else "---"
+             # ("eco2_string_LCD = bme.eco2StrLCD() if eco2 != "-" else "---""" müsste auch gehen, so wie jetzt gehts halt aber auch)
 
-            tAußen = esp.get("temperature")                # Außentemperatur
-            tAußen = tAußen if check.is_plausible(tAußen, -15, 60) else "-" # Plausibel?
+            tAussen = esp.get("temperature")                # Außentemperatur
+            tAussen = tAussen if check.isPlausible(tAussen, -15, 60) else "-" # Plausibel?
 
-            hAußen = esp.get("humidity")                   # Außen rF
-            hAußen = hAußen if check.is_plausible(hAußen, 10, 90) else "-" # Plausibel?
+            hAussen = esp.get("humidity")                   # Außen rF
+            hAussen = hAussen if check.isPlausible(hAussen, 10, 90) else "-" # Plausibel?
             
-            tATxt = esp.get_str("temperature", unit="°C") if tAußen != "-" else "---"  # Außentemperatur als String
-            hATxt = esp.get_str("humidity", unit="%rF") if hAußen != "-" else "---" # Außenfeuchte als String
+            tATxt = esp.getStr("temperature", unit="°C") if tAussen != "-" else "---"  # Außentemperatur als String
+            hATxt = esp.getStr("humidity", unit="%rF") if hAussen != "-" else "---" # Außenfeuchte als String
             
             sonnenWert = esp.get("sun_raw")                # Sonnenwert (Rohwert)
-            sonnenWert = sonnenWert if check.is_plausible(sonnenWert, 0, 4096) else "-"
+            sonnenWert = sonnenWert if check.isPlausible(sonnenWert, 0, 4096) else "-"
             
             sonnenKategorie = esp.get("sun_kategorie")     # Sonnenkategorie (1-4)
             sonnenKategorie = sonnenKategorie if sonnenWert != "-" else "-"
             
-            uv = uvApi.hohle_current_uv()                  # UV-Wert von API
-            uv = uv if check.is_plausible(uv, 0, 11) else "-"
+            uv = uvApi.hohleCurrentUv()                  # UV-Wert von API
+            uv = uv if check.isPlausible(uv, 0, 11) else "-"
             
-            temp_innen = bme.read_temperature()            # Temperatur innen
-            temp_innen = temp_innen if check.is_plausible(temp_innen, 5, 40) else "-" # Plausibel?
+            tempInnen = bme.readTemperature()            # Temperatur innen
+            tempInnen = tempInnen if check.isPlausible(tempInnen, 5, 40) else "-" # Plausibel?
             
-            hum_innen = bme.read_humidity()                  # rF innen
-            hum_innen = hum_innen if check.is_plausible(hum_innen, 10, 90) else "-" # Plausibel?
+            humInnen = bme.readHumidity()                  # rF innen
+            humInnen = humInnen if check.isPlausible(humInnen, 10, 90) else "-" # Plausibel?
 
             
 
@@ -79,23 +79,23 @@ def main():
             # LCD-Ausgabe je nach Button-Zustand (Menü)
             if button.zustand == 0:
                 lcd.lcd.backlight_enabled = True  # Hintergrundbeleuchtung an
-                if acc < display_acc:
+                if acc < displayAcc:
                     # Sensor noch nicht kalibriert: Kalibrierungsanzeige
-                    lcd.display_calibration(temp_innen, hum_innen,
-                                            bme.iaq_str_LCD(), bme.eco2_str_LCD()) # Für Kalibr. Anzeige unge"plausibilisiert"
+                    lcd.displayCalibration(tempInnen, humInnen,
+                                            bme.iaqStrLCD(), bme.eco2StrLCD()) # Für Kalibr. Anzeige unge"plausibilisiert"
                 else:
                     # Sensor kalibriert: Messwerte anzeigen
-                    lcd.display_measurement(temp_innen, hum_innen,
-                                            iaq_string_LCD, eco2_string_LCD, eco2)
+                    lcd.displayMeasurement(tempInnen, humInnen,
+                                            iaqStringLcd, eco2StringLcd, eco2)
                     
             elif button.zustand == 1:
                 lcd.lcd.backlight_enabled = True
-                if not esp.is_alive():
+                if not esp.isAlive():
                     # Außenstation nicht erreichbar
-                    lcd.display_text("Aussenstation:",  "Connection Lost")
+                    lcd.displayText("Aussenstation:",  "Connection Lost")
                 else:
                     # Außenwerte und UV anzeigen
-                    lcd.display_text(f"Aussen: UV:{uv}", f"{tATxt} {hATxt}")
+                    lcd.displayText(f"Aussen: UV:{uv}", f"{tATxt} {hATxt}")
                     lcd.sunSymbol(sonnenKategorie)  # Sonnen-Symbol je nach Kategorie
 
             elif button.zustand == 2:
@@ -103,11 +103,11 @@ def main():
                 lcd.lcd.backlight_enabled = False
 
             # Terminal-Ausgabe (Debug/Monitoring)
-            print("\nTemperatur: %0.1f °C" % temp_innen)
-            print("Luftfeuchtigkeit: %0.1f %%" % hum_innen)
-            print("Luftqualität:", bme.iaq_str())
-            print("CO₂-Äquivalent:", bme.eco2_str()) # Plausibilitätsprüfung für Bugfixing weggelassen
-            if not esp.is_alive():
+            print("\nTemperatur: %0.1f °C" % tempInnen)
+            print("Luftfeuchtigkeit: %0.1f %%" % humInnen)
+            print("Luftqualität:", bme.iaqStr())
+            print("CO₂-Äquivalent:", bme.eco2Str()) # Plausibilitätsprüfung für Bugfixing weggelassen
+            if not esp.isAlive():
                 print("Außen-Station: connection lost")
             else:
                 print(f"\nAußen: Temperatur; {tATxt}  Hum; {hATxt}")
@@ -116,8 +116,8 @@ def main():
 
             # MQTT-Publish für OpenHAB
             werte = {
-                "temp": temp_innen,
-                "hum": hum_innen,
+                "temp": tempInnen,
+                "hum": humInnen,
                 "iaq": iaq,
                 "eco2": eco2,
                 "uvApi": uv,
@@ -125,16 +125,16 @@ def main():
             mqtt.publish(werte)
             
             # Datenbank-Logging: alle 30 Sekunden Mittelwerte speichern
-            if time.time() >= next_log:         
+            if time.time() >= nextLog:         
                 speicher.logRow(
                     bme,
-                    tAußen,
-                    hAußen,
+                    tAussen,
+                    hAussen,
                     sonnenKategorie,
                     sonnenWert,
                     uv 
                 )         
-                next_log += 30  # Nächster Log in 30 Sekunden
+                nextLog += 30  # Nächster Log in 30 Sekunden
 
             time.sleep(2.0)  # Hauptloop alle 2 Sekunden
 
@@ -142,7 +142,7 @@ def main():
         # Bei Strg+C: Threads und Sensoren sauber beenden
         bme.close()           # Sensor schließen (State speichern)
         ampel.stop()          # Ampel-Thread stoppen
-        ampel_thread.join()   # Warten bis Ampel-Thread beendet
+        ampelThread.join()   # Warten bis Ampel-Thread beendet
         button.stop()         # Button-Thread stoppen
         button.join()         # Warten bis Button-Thread beendet
         pass # Tue nichts?

@@ -23,7 +23,7 @@ class Ampel:
         self.running = True
 
         # Kalibrierungsphase: LEDs bleiben aus, solange acc < 2 (Sensor noch nicht bereit)
-        while self.running and self.alarm.check_acc():
+        while self.running and self.alarm.checkAcc():
             self.led.color = (0, 0, 0)  # LEDs aus
             sleep(2)                    # 2 Sekunden warten
 
@@ -35,12 +35,12 @@ class Ampel:
         # Hauptschleife: Ampelsteuerung läuft, solange self.running True ist
         while self.running:
             # Sensorwerte aktualisieren
-            self.alarm.update_values()
+            self.alarm.updateValues()
 
             # Einzelne Qualitätswerte abfragen (0=schlecht, 1=mittel, 2=gut)
-            iaq = self.alarm.check_IAQ_quality()      # Luftqualität
-            eco2 = self.alarm.check_eCO2_quality()      # eCO2-Gehalt
-            hum = self.alarm.check_humidity_quality() # Luftfeuchtigkeit
+            iaq = self.alarm.checkIaqQuality()      # Luftqualität
+            eco2 = self.alarm.checkEco2Quality()      # eCO2-Gehalt
+            hum = self.alarm.checkHumidityQuality() # Luftfeuchtigkeit
 
             # Wenn einer der Werte schlecht ist (0), Rot-Zähler dekrementieren
             if iaq == 0 or eco2 == 0 or hum == 0:
@@ -52,7 +52,7 @@ class Ampel:
                     # Zähler zurücksetzen
                     self.rot, self.gelb, self.grün = 3, 3, 3
                     # Notfallsignal prüfen und ggf. Buzzer aktivieren
-                    if self.alarm.check_emergency():
+                    if self.alarm.checkEmergency():
                         self.buzzer.soundsek(500, 14)
 
             # Wenn einer der Werte mittel ist (1), Gelb-Zähler dekrementieren
@@ -78,24 +78,24 @@ class Ampel:
             sleep(2)
 
     def stop(self):
-        """Stoppe die Ampelsteuerung."""
+        # Stoppe die Ampelsteuerung
         self.running = False              # Hauptschleife beenden
         self.led.color = (0, 0, 0)       # Alle LEDs ausschalten
 
     def ampelt_test(self):
-        """Teste die Ampelsteuerung."""
+        # Teste die Ampelsteuerung
         self.led.color = (0, 0.1, 0)     # Grün einschalten
         sleep(1)
         self.led.color = (0.4, 0.4, 0)   # Gelb einschalten
         sleep(1)
         self.led.color = (0.7, 0, 0)     # Rot einschalten
 
-    def _set_leds(self, states):
-        """Hilfsfunktion, um die LEDs zu steuern.
-        (Wird aktuell nicht verwendet, da RGBLED genutzt wird.)
-        """
-        for led, state in zip(self.leds, states):
-            if state:
-                led.on()
-            else:
-                led.off()
+    # def setLeds(self, states):
+    #     # Hilfsfunktion, um die LEDs zu steuern.
+    #     # (Wird aktuell nicht verwendet, da RGBLED genutzt wird.)
+        
+    #     for led, state in zip(self.leds, states):
+    #         if state:
+    #             led.on()
+    #         else:
+    #             led.off()
