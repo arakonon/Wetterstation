@@ -31,7 +31,7 @@ class Ampel:
         self.running = True
 
         # Kalibrierungsphase: LEDs bleiben aus, solange acc < 2 (Sensor noch nicht bereit)
-        self.wait_for_calibration()
+        self.waitForKalib()
         if not self.running:
             # Falls gestoppt wurde, Funktion verlassen
             return
@@ -48,11 +48,11 @@ class Ampel:
 
             # Prüfe auf Kalibrierungsverlust
             if iaq is None or eco2 is None:
-                print("[Ampel] Kalibrierung verloren, gehe zurück in Kalibrierungsphase.")
+                print("[Ampel] Kalibrierung verloren gehe zurück in Kalibrierungsphase.")
                 # LEDs aus
                 self.led.off()
                 # Zurück in die Kalibrierungsphase springen
-                self.wait_for_calibration()
+                self.waitForKalib()
                 if not self.running:
                     return
                 continue
