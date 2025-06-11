@@ -18,19 +18,23 @@ class Ampel:
         # Zähler für die Ampelphasen (debouncing, um nicht bei jedem schlechten Wert sofort umzuschalten)
         self.rot, self.gelb, self.grün = 3, 3, 3
 
+    def waitForKalib(self):
+            # Wartet, bis die Kalibrierung abgeschlossen ist (acc > 2)
+        while self.running and self.alarm.checkAcc():
+            self.led.color = (0, 0, 0)  # LEDs aus
+            sleep(2)
+        if self.running:
+            print("[Ampel] Kalibrierung abgeschlossen.")
+
     def start(self):
         # Ampelsteuerung starten
         self.running = True
 
         # Kalibrierungsphase: LEDs bleiben aus, solange acc < 2 (Sensor noch nicht bereit)
-        while self.running and self.alarm.checkAcc():
-            self.led.color = (0, 0, 0)  # LEDs aus
-            sleep(2)                    # 2 Sekunden warten
-
+        self.wait_for_calibration()
         if not self.running:
             # Falls gestoppt wurde, Funktion verlassen
             return
-        print("[Ampel] Kalibrierung abgeschlossen.")
 
         # Hauptschleife: Ampelsteuerung läuft, solange self.running True ist
         while self.running:
@@ -41,6 +45,17 @@ class Ampel:
             iaq = self.alarm.checkIaqQuality()      # Luftqualität
             eco2 = self.alarm.checkEco2Quality()      # eCO2-Gehalt
             hum = self.alarm.checkHumidityQuality() # Luftfeuchtigkeit
+
+            # Prüfe auf Kalibrierungsverlust
+            if iaq is None or eco2 is None:
+                print("[Ampel] Kalibrierung verloren, gehe zurück in Kalibrierungsphase.")
+                # LEDs aus
+                self.led.off()
+                # Zurück in die Kalibrierungsphase springen
+                self.wait_for_calibration()
+                if not self.running:
+                    return
+                continue
 
             # Wenn einer der Werte schlecht ist (0), Rot-Zähler dekrementieren
             if iaq == 0 or eco2 == 0 or hum == 0:

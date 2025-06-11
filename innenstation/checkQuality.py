@@ -37,7 +37,7 @@ class checkQuality:
             else:
                 return 2  # Grün
         else:
-            print("[checkIaqQquality] Kalibrierung läuft …")
+            #print("[checkIaqQquality] Kalibrierung läuft …")
             return None
 
     def checkEco2Quality(self):
@@ -51,7 +51,7 @@ class checkQuality:
             else:
                 return 2  # Grün
         else:
-            print("[check_air_quality] Kalibrierung läuft …")
+            #print("[check_air_quality] Kalibrierung läuft …")
             return None
         
     def checkHumidityQuality(self):
@@ -70,7 +70,7 @@ class checkQuality:
             # Noch nicht kalibriert
             return True
         else:
-            print("[checkAcc] Kalibrierung abgeschlossen.")
+            #print("[checkAcc] Kalibrierung abgeschlossen.")
             return False
         
     def checkEmergency(self):
