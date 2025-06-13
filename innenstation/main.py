@@ -30,6 +30,8 @@ def main():
     button.start()  # Button-Thread starten (für Menüumschaltung)
     nextLog = time.time() + 30 # Erster Log nach 30 Sekunden
     wasKalib = False
+    # Startzeit merken, um Kalibrierungsdauer zu berechnen
+    startT = time.time()
     print("warte auf Sensor-Daten")
 
     # Haupt-Loop: läuft bis zum Abbruch (Strg+C)
@@ -81,9 +83,9 @@ def main():
             if button.zustand == 0:
                 lcd.lcd.backlight_enabled = True  # Hintergrundbeleuchtung an
                 if acc < displayAcc and not wasKalib:
+                    mins = int((time.time() - startT) // 60)
                     # Sensor noch nicht kalibriert: Kalibrierungsanzeige
-                    lcd.displayCalibration(tempInnen, humInnen,
-                                            bme.iaqStrLCD(), bme.eco2StrLCD()) # Für Kalibr. Anzeige unge"plausibilisiert"
+                    lcd.displayCalibration(tempInnen, humInnen, mins) # Für Kalibr. Anzeige unge"plausibilisiert"
                 else:
                     wasKalib = True
                     # Sensor kalibriert: Messwerte anzeigen
@@ -124,7 +126,10 @@ def main():
                 "eco2": eco2,
                 "uvApi": uv,
             }
-            mqtt.publish(werte)
+            if acc > 2:
+                mqtt.publish(werte)
+            else:
+                print("[DEBUG] MQTT nicht gesendet")
             
             # Datenbank-Logging: alle 30 Sekunden Mittelwerte speichern
             if time.time() >= nextLog:         

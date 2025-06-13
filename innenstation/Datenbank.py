@@ -44,15 +44,15 @@ class Datenbank:
         # Es wird in jedem Aufruf von logRow entscheieden, ob und welche Außen­werte übergeben werden. Wegen Parametern.
         
         # Holt aktuelle Innenwerte vom Sensor und summiert sie für die Mittelwertbildung
-        iaq, _ = sensor.readIaq()
+        iaq, acc = sensor.readIaq()
         eco2, _ = sensor.readEco2()
         hum = sensor.readHumidity()
         temp = sensor.readTemperature()
         valid = False
 
-        if self.check.isPlausible(iaq, 0, 500):
+        if self.check.isPlausible(iaq, 0, 500) and acc > 2:
             self.sumIaq += iaq;    valid = True
-        if self.check.isPlausible(eco2, 0, 5000):
+        if self.check.isPlausible(eco2, 0, 5000) and acc > 2:
             self.sumEco2 += eco2;  valid = True
         if self.check.isPlausible(hum, 10, 90):
             self.sumHum += hum;    valid = True
