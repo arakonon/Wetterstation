@@ -40,7 +40,7 @@ def main():
             # Sensorwerte holen (innen & außen)
             iaq, acc = bme.readIaq()  # IAQ-Wert (und Genauigkeit)
             iaq = iaq if check.isPlausible(iaq, 0, 500) else "-"
-            print("[DEBUG] raw iaq, eco2 = " + str(bme.readIaq()) + str(bme.readEco2()))
+            print("\n\n[DEBUG] raw iaq, eco2 = " + str(bme.readIaq()) + str(bme.readEco2()))
             
             eco2, eco2Acc = bme.readEco2()
             eco2 = eco2 if check.isPlausible(eco2, 0, 5000) else "-"
@@ -119,17 +119,23 @@ def main():
                 print(f"UV-Wert von API: {uv}")
 
             # MQTT-Publish für OpenHAB
-            werte = {
+            if acc > 2:
+                 werte = {
                 "temp": tempInnen,
                 "hum": humInnen,
                 "iaq": iaq,
                 "eco2": eco2,
                 "uvApi": uv,
-            }
-            if acc > 2:
-                mqtt.publish(werte)
+                }     
             else:
-                print("[DEBUG] MQTT nicht gesendet")
+                werte = {
+                "temp": tempInnen,
+                "hum": humInnen,
+                "uvApi": uv,
+                }
+                print("\n[DEBUG] Iaq und Eco2 in MQTT nicht gesendet")
+
+            mqtt.publish(werte)
             
             # Datenbank-Logging: alle 30 Sekunden Mittelwerte speichern
             if time.time() >= nextLog:         

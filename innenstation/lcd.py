@@ -166,7 +166,7 @@ class LcdControl:
     def displayMeasurement(self, temperature, humidity, iaq_str, eco2_str, eco2):
         # Zeigt Messdaten (Temp, Feuchte, IAQ, eCO2) mit Symbolen auf LCD an
         self.displayText(f" {temperature:.1f}°C  {humidity:.1f}%rF",
-                    iaq_str + "     " + eco2_str)
+                    iaq_str + "      " + eco2_str)
         ppmPlacement = 14 if eco2 > 999 else 13 if eco2 > 99 else 12 # Für den Ort, an dem das Symbol "ppm" auf dem LCD angezeigt wird.
             # Für Debug nach "if" auskommentieren, wenn isPlausible fehlschlägt und eco2 zu String wird 
 
