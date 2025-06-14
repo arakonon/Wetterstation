@@ -79,12 +79,6 @@ class Datenbank:
         if self.count == 0:         # Sollte eigentlich nie passieren
             return
         
-        # ACHTUNG, ganz besonders:
-        avg = lambda s: round(s / self.count, 2)
-            # lambda = anonyme funktion 
-            # s = parameter
-            # Die funktion macht: round(s / self.count, 2)
-            # round(s / count = x, 2) liefert x gerundet auf 2 Dezimalstellen.
 
         # Zeile für CSV-Datei zusammenbauen
         row = [
@@ -92,12 +86,11 @@ class Datenbank:
                 # datetime.datetime.now() liefert die aktuelle Uhrzeit inklusive Datum als datetime-Objekt
                 # isoformat(timespec="seconds") wandelt das datetime-Objekt in einen ISO-8601-String um
                 # timespec="seconds" entfernt Mikrosekunden.
-            avg(self.sumIaq),
-            avg(self.sumEco2),
-            avg(self.sumHum),
-            avg(self.sumTemp),
+            self.avg(self.sumIaq),
+            self.avg(self.sumEco2),
+            self.avg(self.sumHum),
+            self.avg(self.sumTemp),
 
-            # Pythons ternärer Ausdruck (inline-if)
             # Round nur, damit max 2 Nachkommastellen
             # extra Check für "" und nicht "-"
             "" if self.extTemp is None or not isinstance(self.extTemp, (int, float)) else round(self.extTemp, 2),
@@ -137,3 +130,9 @@ class Datenbank:
         self.sumHum = self.sumTemp = 0.0
         self.count = 0
         self.lastWrite = now
+
+    def avg(self, s):
+        return round(s / self.count, 2)
+        # s = parameter
+        # Die funktion macht: round(s / self.count, 2)
+        # round(s / count = x, 2) liefert x gerundet auf 2 Dezimalstellen.

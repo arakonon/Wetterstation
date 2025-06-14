@@ -89,8 +89,7 @@ def main():
                 else:
                     wasKalib = True
                     # Sensor kalibriert: Messwerte anzeigen
-                    lcd.displayMeasurement(tempInnen, humInnen,
-                                            iaqStringLcd, eco2StringLcd, eco2)
+                    lcd.displayMeasurement(tempInnen, humInnen, iaqStringLcd, eco2StringLcd, eco2, iaq)
                     
             elif button.zustand == 1:
                 lcd.lcd.backlight_enabled = True
@@ -133,7 +132,7 @@ def main():
                 "hum": humInnen,
                 "uvApi": uv,
                 }
-                print("\n[DEBUG] Iaq und Eco2 in MQTT nicht gesendet")
+                # print("\n[DEBUG] Iaq und Eco2 in MQTT nicht gesendet")
 
             mqtt.publish(werte)
             

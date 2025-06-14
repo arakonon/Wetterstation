@@ -93,18 +93,13 @@ class BME680:
 
     # ---- IAQ / eCO₂ --------------------------------------------------
     def readIaq(self):
-        # Holt aktuellen IAQ-Wert (Luftqualität) und Genauigkeit
-        # Gibt (iaq, acc) zurück, aber nur echten Wert wenn acc >= 2, sonst None
+        # Holt aktuellen Static IAQ-Wert (Luftqualität) und Genauigkeit
+        # Gibt (static_iaq, static_iaq_accuracy) zurück, aber nur echten Wert wenn acc >= 2, sonst None
         self.update()
-        iaq = self.last["iaq"]
-        acc = self.last["iaq_accuracy"]
-        return (iaq if acc >= 2 else iaq, acc) # Schon ab accuracy 2 in der Konsole ausgeben
-                                               # ACHTUNG eig (iaq if acc >= 2 else None, acc) aber für debug so
-            # return ((iaq if acc >= 2 else None), acc)
-            # if acc >= 2:
-            #     return (iaq, acc)
-            # else:
-            #     return (None, acc)
+        static_iaq = self.last["static_iaq"]
+        static_iaq_acc = self.last["static_iaq_accuracy"]
+        return (static_iaq if static_iaq_acc >= 2 else static_iaq, static_iaq_acc)
+        # Für Debug: eig (static_iaq if static_iaq_acc >= 2 else None, static_iaq_acc)
 
     def readEco2(self):
         # Holt aktuellen CO₂-Äquivalent-Wert und Genauigkeit
@@ -116,14 +111,13 @@ class BME680:
 
     # ---- Convenience-Strings ---------------------------------------
     def iaqStr(self):
-        # Gibt einen formatierten String für den IAQ-Wert zurück.
+        # Gibt einen formatierten String für den Static IAQ-Wert zurück.
         # Zeigt Kalibrierungsdauer, falls accuracy < 2.
-
-        iaq, acc = self.readIaq()
-        if acc < 1:
+        static_iaq, static_iaq_acc = self.readIaq()
+        if static_iaq_acc < 1:
             mins = int((time.time() - self.startT) // 60)
-            return f"Acc: {int(acc)} Kalibrierung seit: {mins:02d} Minuten"
-        return f"{iaq:.1f} (Acc {acc})"
+            return f"Acc: {int(static_iaq_acc)} Kalibrierung seit: {mins:02d} Minuten"
+        return f"{static_iaq:.1f} (Acc {static_iaq_acc})"
 
     def eco2Str(self):
         # Gibt einen formatierten String für den eCO₂-Wert zurück.
@@ -137,12 +131,12 @@ class BME680:
     
     #---- Convenience-Strings für LCD -------------------------------
     def iaqStrLCD(self):
-        # Kurzer String für LCD-Anzeige: IAQ oder Kalibrierung.
-        iaq, acc = self.readIaq()
-        if acc <= self.acc_wert_lcd:
+        # Kurzer String für LCD-Anzeige: Static IAQ oder Kalibrierung.
+        static_iaq, static_iaq_acc = self.readIaq()
+        if static_iaq_acc <= self.acc_wert_lcd:
             mins = int((time.time() - self.startT) // 60)
             return "Kalibr. seit"
-        return f"  {int(iaq)}"
+        return f"  {int(static_iaq)}"
 
     def eco2StrLCD(self):
         # Kurzer String für LCD-Anzeige: CO₂ oder Kalibrierungszeit.
@@ -154,12 +148,10 @@ class BME680:
     # ----------------------------------------------------------------
     def saveState(self):
         # Speichert den aktuellen Kalibrierungszustand des Sensors.
-        # Nur wenn Accuracy == 3 (maximale Genauigkeit erreicht).
-        acc = self.last.get("iaq_accuracy", 0) if self.last else 0
-            # Hohlt den letzten acc Stand, wenn dieser nicht existiert; Rückfall-Wert 0
-            # Wenn self.last nicht truthly ist (nicht existiert(None ist)), auch 0
+        # Nur wenn Static IAQ Accuracy == 3 (maximale Genauigkeit erreicht).
+        static_iaq_acc = self.last.get("static_iaq_accuracy", 0) if self.last else 0
 
-        if acc == 3:
+        if static_iaq_acc == 3:
             with open(STATE_FILE, "w") as f:
                 json.dump(self.sensor.get_bsec_state(), f)
                 # Erzeugt einen Context Manager.
