@@ -46,7 +46,7 @@ class Ampel:
             eco2 = self.alarm.checkEco2Quality()      # eCO2-Gehalt
             hum = self.alarm.checkHumidityQuality() # Luftfeuchtigkeit
 
-            # Prüfe auf Kalibrierungsverlust
+            # Prüfe auf Kalibrierungsverlust; auskommentieren wenn Sensor leichte probleme hat
             if iaq is None or eco2 is None:
                 print("[Ampel] Kalibrierung verloren gehe zurück in Kalibrierungsphase.")
                 # LEDs aus
@@ -104,13 +104,3 @@ class Ampel:
         self.led.color = (0.4, 0.4, 0)   # Gelb einschalten
         sleep(1)
         self.led.color = (0.7, 0, 0)     # Rot einschalten
-
-    # def setLeds(self, states):
-    #     # Hilfsfunktion, um die LEDs zu steuern.
-    #     # (Wird aktuell nicht verwendet, da RGBLED genutzt wird.)
-        
-    #     for led, state in zip(self.leds, states):
-    #         if state:
-    #             led.on()
-    #         else:
-    #             led.off()

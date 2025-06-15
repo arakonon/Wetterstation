@@ -17,8 +17,8 @@ class Buzzer:
         #print("Buzzer aus")  # Debug-Ausgabe
         self.buzzer.off()  # Schalte Buzzer aus (PWM auf 0)
 
-# Testcode (auskommentiert):
-# Wenn dieses Skript direkt ausgeführt wird, wird der Buzzer im Sekundentakt getestet.
+# Testcode
+# Buzzer wird im Sekundentakt getestet
 # if __name__ == "__main__":
 #     buzzer = Buzzer()
 #     try:
