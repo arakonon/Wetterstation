@@ -51,10 +51,10 @@ class Datenbank:
         temp = sensor.readTemperature()
         valid = False
 
-        if self.check.isPlausible(iaq, 0, 500) and acc > 2:
+        if self.check.isPlausible(iaq, 0, 500): #and acc > 2: # Einkommentieren, wenn nicht geloggt werden soll, wenn acc sinkt
             self.sumIaq += iaq
             self.countIaq += 1
-        if self.check.isPlausible(eco2, 0, 5000) and acc > 2:
+        if self.check.isPlausible(eco2, 0, 5000): #and acc > 2:
             self.sumEco2 += eco2
             self.countEco2 += 1
         if self.check.isPlausible(hum, 10, 90):

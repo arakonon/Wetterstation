@@ -12,7 +12,7 @@ import threading
 
 # Sensor- und Steuerungsobjekte initialisieren
 displayAcc = 3 # Standart auf 3, zum testen ohne cal. LCD auf 0
-    # acc_wert_lcd standart auf 2, zum testen auf -1
+    # acc_wert_lcd, wenn acc wichting, auf 2. Sonst auf -1
 bme = BME680(temp_offset=-0.1,acc_wert_lcd=-1)      # BME680-Sensor mit Temperatur-Offset
 ampel = Ampel(bme)                  # Ampel-Logik mit Sensor
 lcd = LcdControl()                  # LCD-Anzeige
@@ -117,8 +117,8 @@ def main():
                 print(f"Sun: raw; {sonnenWert} Kategorie {sonnenKategorie}")
                 print(f"UV-Wert von API: {uv}")
 
-            # MQTT-Publish für OpenHAB
-            if acc > 2:
+            # MQTT-Publish für OpenHAB; auf 2 Wenn nicht gesendet werden soll, wenn acc sinkt
+            if acc > -1:
                  werte = {
                 "temp": tempInnen,
                 "hum": humInnen,

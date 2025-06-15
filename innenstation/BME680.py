@@ -96,8 +96,8 @@ class BME680:
         # Holt aktuellen Static IAQ-Wert (Luftqualität) und Genauigkeit
         # Gibt (static_iaq, static_iaq_accuracy) zurück, aber nur echten Wert wenn acc >= 2, sonst None
         self.update()
-        static_iaq = self.last["static_iaq"]
-        static_iaq_acc = self.last["static_iaq_accuracy"]
+        static_iaq = self.last["iaq"]
+        static_iaq_acc = self.last["iaq_accuracy"]
         return (static_iaq if static_iaq_acc >= 2 else static_iaq, static_iaq_acc)
         # Für Debug: eig (static_iaq if static_iaq_acc >= 2 else None, static_iaq_acc)
 
@@ -149,7 +149,7 @@ class BME680:
     def saveState(self):
         # Speichert den aktuellen Kalibrierungszustand des Sensors.
         # Nur wenn Static IAQ Accuracy == 3 (maximale Genauigkeit erreicht).
-        static_iaq_acc = self.last.get("static_iaq_accuracy", 0) if self.last else 0
+        static_iaq_acc = self.last.get("iaq_accuracy", 0) if self.last else 0
 
         if static_iaq_acc == 3:
             with open(STATE_FILE, "w") as f:
