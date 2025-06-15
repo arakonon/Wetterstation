@@ -1,5 +1,9 @@
-Dokumentation: (Modulare) Wetter  und Luftqualitätsstation
-Konrad - Hardwareprojekt – Sommersemester 2025
+Dokumentation: 
+
+(Modulare) Wetter  und Luftqualitätsstation
+Hardwareprojekt HSNR-MI – Sommersemester 2025
+
+
 1 Einleitung
   Die Luftqualität in Innenräumen hat direkten Einfluss auf Gesundheit, Wohl befinden und Konzentrationsfähigkeit. Gleichzeitig ist es für Bastlerinnen und Bastler reizvoll, mithilfe günstiger Mikrocontroller eigene Mess , Anzeige  und Alarm¬systeme aufzubauen. Ziel dieses Projekts ist deshalb der Entwurf einer Wetter  und Luftqualitäts station, die
   •	Innen  wie Außenmessungen kombiniert (VOC basiertes IAQ, eCO₂, Temperatur, rel. Luft feuchte, Luftdruck und UV Index),
