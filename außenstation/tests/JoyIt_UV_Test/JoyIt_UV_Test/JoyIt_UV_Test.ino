@@ -32,7 +32,6 @@ void setup() {
 }
 
 void loop() {
-  // ─── DHT22 auslesen ───────────────────────────────────────────────────
   float t = dht.readTemperature();   // Temperatur in °C
   float h = dht.readHumidity();      // Luftfeuchte in % r.F.
 
@@ -42,7 +41,6 @@ void loop() {
     Serial.printf("DHT22 → T: %.2f °C    H: %.2f %%\n", t, h);
   }
 
-  // ─── UV-Sensor (nur Rohwert und Kategorie) ────────────────────────────
   uint16_t rawUV = analogRead(UV_PIN);
   int kategorie = getSonneKategorie(rawUV);
 
