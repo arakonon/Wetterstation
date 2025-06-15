@@ -4,9 +4,9 @@ import paho.mqtt.client as mqtt
 
 class EspAußen:
     def __init__(self, host = "localhost", topic = "esp32/#", timeout = 600):
-        self.host     = host  # Host/IP des MQTT-Brokers speichern
+        self.host     = host  # HostIP des MQTT-Brokers speichern
             # localhost, weil der Broker auf diesem Pi läuft
-        self.topic    = topic  # Topic-Pattern für ESP32-Daten (alle Subtopics)
+        self.topic    = topic  # Topicpattern für ESP32-Daten (alle Subtopics)
         self.timeout  = timeout  # Timeout in Sekunden, wie lange Werte als "frisch" gelten
         self.values   = {}  # Dictionary für empfangene Werte (key: Messgröße, value: (Wert, Zeitstempel))
             # Dictionary = HashMap(Java)

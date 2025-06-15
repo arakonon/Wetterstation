@@ -18,7 +18,7 @@ class LcdControl:
             backlight_enabled=True     # Hintergrundbeleuchtung direkt anschalten
         )
         
-        # Eigene Zeichen als 8x5 Bitmaps(?)(siehe library) definieren (z.B. eCO2, ppm, AI, Sonne etc.)
+        # Eigene Zeichen als 8x5 Bitmaps(siehe library) definieren
         # "The HD44780 supports up to 8 user created characters. 
         # A character is defined by a 8x5 bitmap. 
         # The bitmap should be a tuple of 8 numbers, each representing a 5 pixel row. 
@@ -228,7 +228,7 @@ class lcdCheck(threading.Thread):
 
     def naechsterZustand(self):
         # Wird bei Tastendruck aufgerufen
-        # Prüft, ob seit dem letzten Druck genug Zeit vergangen ist (Entprellung)
+        # Prüft, ob seit dem letzten Druck genug Zeit vergangen ist 
         now = time.time()
         if now - self.lastPress > self.debounceTime:
             # Zustand erhöhen, bei Maximum wieder auf 0 springen

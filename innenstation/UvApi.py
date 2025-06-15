@@ -10,7 +10,7 @@ class UvApiClient:
         self.alt = 100        # Höhe (Meter)
         self.lastuv = None  # Letzter gespeicherter UV-Wert
         self.lastupdate = 0 # Zeitpunkt der letzten Abfrage
-        self.interval = 1800 # Intervall für neue Abfrage (Sekunden, hier 30 Minuten)
+        self.interval = 1800 # Intervall für neue Abfrage Sekunden, hier 30 Minuten
 
     def hohleCurrentUv(self):
         now = time.time()  # Aktuelle Zeit holen

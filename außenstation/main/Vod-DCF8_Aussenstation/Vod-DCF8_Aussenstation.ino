@@ -121,10 +121,9 @@ void loop() {
   // Nie erreicht
 }
 
-// ─── Deep-Sleep Funktion 
-// Deep-Sleep Einstellungen im Stil des Beispielcodes
+// Deep-Sleep Funktion 
 const int TIME_TO_SLEEP_MIN = 5;                        // Zeit in Minuten, die der ESP32 schlafen soll
-const unsigned long long uS_TO_MIN_FACTOR = 60ULL * 1000000ULL; // Umrechnungsfaktor Minuten → Mikrosekunden
+const unsigned long long uS_TO_MIN_FACTOR = 60ULL * 1000000ULL; // Umrechnungsfaktor Minuten, Mikrosekunden
   // ULL = unsigned long long; stellt sicher, dass die Multiplikation korrekt im 64-Bit-Bereich passiert und keine Werte verloren gehen.
 
 void goSleep() {
