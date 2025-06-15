@@ -5,8 +5,8 @@ Hardwareprojekt HSNR-MI – Sommersemester 2025
 
 
 1 Einleitung
-  Die Luftqualität in Innenräumen hat direkten Einfluss auf Gesundheit, Wohl befinden und Konzentrationsfähigkeit. Gleichzeitig ist es für Bastlerinnen und Bastler reizvoll, mithilfe günstiger Mikrocontroller eigene Mess , Anzeige  und Alarm¬systeme aufzubauen. Ziel dieses Projekts ist deshalb der Entwurf einer Wetter  und Luftqualitäts station, die
-  •	Innen  wie Außenmessungen kombiniert (VOC basiertes IAQ, eCO₂, Temperatur, rel. Luft feuchte, Luftdruck und UV Index),
+  Die Luftqualität in Innenräumen hat direkten Einfluss auf Gesundheit, Wohl befinden und Konzentrationsfähigkeit. Ziel dieses Projekts ist deshalb der Entwurf einer Wetter  und Luftqualitäts station, die
+  •	Innen  wie Außenmessungen kombiniert (VOC basiertes IAQ, eCO₂, Temperatur, rel. Luft feuchte, und UV Index),
   •	ihre Daten untereinander per MQTT auszutauschen und eine Erweiterung über OpenHAB / Webserver ermöglicht,
   •	Warnungen akustisch (Buzzer) und optisch (RGB Ampel) signalisiert,
   •	Mess¬reihen langfristig loggt und visualisiert.
