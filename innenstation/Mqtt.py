@@ -1,4 +1,3 @@
-#"Grund"code: https://tutorials-raspberrypi.de/datenaustausch-raspberry-pi-mqtt-broker-client/
 import time, threading
 import paho.mqtt.client as mqtt
 

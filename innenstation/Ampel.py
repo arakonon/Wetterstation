@@ -47,7 +47,7 @@ class Ampel:
             eco2 = self.alarm.checkEco2Quality()      # eCO2-Gehalt
             hum = self.alarm.checkHumidityQuality() # Luftfeuchtigkeit
 
-            # # Prüfe auf Kalibrierungsverlust; auskommentieren wenn Sensor leichte probleme hat
+            # # Prüfe auf Kalibrierungsverlust; auskommentieren wenn acc nach erster Kalibrierung nicht wichtig
             # if iaq is None or eco2 is None:
             #     print("[Ampel] Kalibrierung verloren gehe zurück in Kalibrierungsphase.")
             #     # LEDs aus

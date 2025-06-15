@@ -19,7 +19,7 @@ class BME680:
 
         self.acc_wert_lcd = acc_wert_lcd     
 
-        # --- Sensor & BSEC Initialisierung ---
+        # Sensor & BSEC Initialisierung 
         # Sensor-Objekt erzeugen, Adresse und BSEC-Modus setzen
         self.sensor = bme68x.BME68X(addr, 1)        # use_bsec = 1
         self.sensor.set_sample_rate(SAMPLE_RATE)    # Sampling-Rate setzen
@@ -31,7 +31,7 @@ class BME680:
                 # round(temp_offset) rundet den übergebenen Gleitkomma-Wert auf die nächste Ganzzahl
                 # int(...) wandelt das Ergebnis (das von round als Float kommt) in einen Integer um.
 
-        # --- Kalibrierungs-Status laden ---
+        # Kalibrierungs-Status laden
         # Prüfen, ob ein gespeicherter State existiert (Kalibrierung)
         if os.path.exists(STATE_FILE):
             with open(STATE_FILE) as f:
@@ -50,7 +50,7 @@ class BME680:
         self.last = None # Wird zum Dictionary/ HashMap(java) wieso?
         self.lastT = 0.0
 
-    # ----------------------------------------------------------------
+
     def update(self):
         # Holt neue Daten vom Sensor, falls das Sampling-Intervall abgelaufen ist.
         # Wenn die letzten Daten noch frisch genug sind, nichts tun
@@ -70,7 +70,7 @@ class BME680:
                 raise RuntimeError("Timeout: keine gültigen Sensordaten")
             time.sleep(0.05)  # Kurz warten und erneut versuchen
 
-    # ---- Öffentliche Lesemethoden ----------------------------------
+
     def readTemperature(self):
         # Holt aktuelle Temperatur vom Sensor (°C)
         self.update()  # Frische Daten holen, falls nötig
@@ -91,7 +91,7 @@ class BME680:
         self.update()
         return self.last["raw_gas"]
 
-    # ---- IAQ / eCO₂ --------------------------------------------------
+
     def readIaq(self):
         # Holt aktuellen Static IAQ-Wert (Luftqualität) und Genauigkeit
         # Gibt (static_iaq, static_iaq_accuracy) zurück, aber nur echten Wert wenn acc >= 2, sonst None
@@ -109,7 +109,7 @@ class BME680:
         acc = self.last["co2_accuracy"]
         return (eco2 if acc >= 2 else eco2, acc) # ACHTUNG, eig (eco2 if acc >= 2 else None, acc) aber für debug so
 
-    # ---- Convenience-Strings ---------------------------------------
+
     def iaqStr(self):
         # Gibt einen formatierten String für den Static IAQ-Wert zurück.
         # Zeigt Kalibrierungsdauer, falls accuracy < 2.
@@ -129,7 +129,7 @@ class BME680:
             return f"Acc: {int(acc)} Kalibrierung seit: {mins:02d} Minuten"
         return f"{int(eco2)} ppm (Acc {acc})"
     
-    #---- Convenience-Strings für LCD -------------------------------
+
     def iaqStrLCD(self):
         # Kurzer String für LCD-Anzeige: Static IAQ oder Kalibrierung.
         static_iaq, static_iaq_acc = self.readIaq()
@@ -145,7 +145,7 @@ class BME680:
             mins = int((time.time() - self.startT) // 60)
             return f"{mins:02d}m"
         return f"{int(eco2)}"
-    # ----------------------------------------------------------------
+
     def saveState(self):
         # Speichert den aktuellen Kalibrierungszustand des Sensors.
         # Nur wenn Static IAQ Accuracy == 3 (maximale Genauigkeit erreicht).
