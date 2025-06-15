@@ -19,7 +19,8 @@ class Datenbank:
         # Puffer für Innenwerte initialisieren
         self.sumIaq = self.sumEco2 = 0.0
         self.sumHum = self.sumTemp = 0.0
-        self.count = 0  # Anzahl gültiger Messungen im aktuellen Intervall
+        self.countIaq = self.countEco2 = 0
+        self.countHum = self.countTemp = 0
 
         # Außenwerte
         self.extTemp = None
@@ -51,13 +52,21 @@ class Datenbank:
         valid = False
 
         if self.check.isPlausible(iaq, 0, 500) and acc > 2:
-            self.sumIaq += iaq;    valid = True
+            self.sumIaq += iaq
+            self.countIaq += 1
+            valid = True
         if self.check.isPlausible(eco2, 0, 5000) and acc > 2:
-            self.sumEco2 += eco2;  valid = True
+            self.sumEco2 += eco2
+            self.countEco2 += 1
+            valid = True
         if self.check.isPlausible(hum, 10, 90):
-            self.sumHum += hum;    valid = True
+            self.sumHum += hum
+            self.countHum += 1
+            valid = True
         if self.check.isPlausible(temp, 9, 40):
-            self.sumTemp += temp;  valid = True
+            self.sumTemp += temp
+            self.countTemp += 1
+            valid = True
         if valid:
             self.count += 1  # Nur wenn mindestens ein Wert gültig ist
                 # Für die Rechenopertation
@@ -86,10 +95,10 @@ class Datenbank:
                 # datetime.datetime.now() liefert die aktuelle Uhrzeit inklusive Datum als datetime-Objekt
                 # isoformat(timespec="seconds") wandelt das datetime-Objekt in einen ISO-8601-String um
                 # timespec="seconds" entfernt Mikrosekunden.
-            self.avg(self.sumIaq),
-            self.avg(self.sumEco2),
-            self.avg(self.sumHum),
-            self.avg(self.sumTemp),
+            self.avg(self.sumIaq, self.countIaq),
+            self.avg(self.sumEco2, self.countEco2),
+            self.avg(self.sumHum, self.countHum),
+            self.avg(self.sumTemp, self.countTemp),
 
             # Round nur, damit max 2 Nachkommastellen
             # extra Check für "" und nicht "-"
@@ -128,11 +137,10 @@ class Datenbank:
         # Puffer zurücksetzen für das nächste Intervall
         self.sumIaq = self.sumEco2 = 0.0
         self.sumHum = self.sumTemp = 0.0
-        self.count = 0
+        self.countIaq = self.countEco2 = 0
+        self.countHum = self.countTemp = 0
         self.lastWrite = now
 
-    def avg(self, s):
-        return round(s / self.count, 2)
-        # s = parameter
-        # Die funktion macht: round(s / self.count, 2)
-        # round(s / count = x, 2) liefert x gerundet auf 2 Dezimalstellen.
+    def avg(self, w, c):
+        return "" if w == 0 else round(w / c, 2)
+        # round((wert / count) = x), 2) liefert x gerundet auf 2 Dezimalstellen.
