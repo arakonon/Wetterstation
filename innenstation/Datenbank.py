@@ -54,23 +54,17 @@ class Datenbank:
         if self.check.isPlausible(iaq, 0, 500) and acc > 2:
             self.sumIaq += iaq
             self.countIaq += 1
-            valid = True
         if self.check.isPlausible(eco2, 0, 5000) and acc > 2:
             self.sumEco2 += eco2
             self.countEco2 += 1
-            valid = True
         if self.check.isPlausible(hum, 10, 90):
             self.sumHum += hum
             self.countHum += 1
-            valid = True
         if self.check.isPlausible(temp, 9, 40):
             self.sumTemp += temp
             self.countTemp += 1
-            valid = True
-        if valid:
-            self.count += 1  # Nur wenn mindestens ein Wert gültig ist
-                # Für die Rechenopertation
-
+            
+      
         # Neueste Außenwerte merken
         # Müssen nicht gemittelt werden, weil der Esp auch nur jede 5 Minuten sendet.
         self.extTemp = tempOut
@@ -85,7 +79,7 @@ class Datenbank:
             return  # Noch nicht genug Zeit vergangen, nichts tun
 
         # Mittelwerte berechnen, falls mindestens eine Messung vorliegt
-        if self.count == 0:         # Sollte eigentlich nie passieren
+        if self.countIaq == 0 and self.countEco2 == 0 and self.countHum == 0 and self.countTemp == 0:
             return
         
 
