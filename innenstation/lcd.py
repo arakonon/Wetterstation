@@ -165,7 +165,7 @@ class LcdControl:
 
     def displayMeasurement(self, temperature, humidity, iaq_str, eco2_str, eco2, iaq):
         # Zeigt Messdaten (Temp, Feuchte, IAQ, eCO2) mit Symbolen auf LCD an
-        if  iaq < 99:
+        if  iaq < 100:
             self.displayText(f" {temperature:.1f}°C  {humidity:.1f}%rF",
                     iaq_str + "      " + eco2_str)
         else:

@@ -4,8 +4,9 @@ import math
 
 class checkQuality:
 
-    def __init__(self, bmee=None):
+    def __init__(self, bmee=None, accQual=-1):
         self.bme = bmee  # Sensorobjekt speichern
+        self.accQual = accQual # soll auf acc geachtet werden
         #self.mittelTimer = 15  # (Optional) Timer für Mittelwertbildung
 
     def updateValues(self):
@@ -28,7 +29,7 @@ class checkQuality:
 
     def checkIaqQuality(self):
         # Prüft die Luftqualität anhand des IAQ-Werts (sofern Kalibrierung ok)
-        if self.iaq_acc >= 2:
+        if self.iaq_acc >= self.accQual:
             # IAQ > 151: sehr schlecht (rot), >101: mittel (gelb), sonst gut (grün)
             if self.iaq > 151:
                 return 0  # Rot
@@ -42,7 +43,7 @@ class checkQuality:
 
     def checkEco2Quality(self):
         # Prüft die eCO2-Qualität (sofern Kalibrierung ok)
-        if self.eco2_acc >= 2:
+        if self.eco2_acc >= self.accQual:
             # eCO2 > 2000: sehr schlecht (rot), >1001: mittel (gelb), sonst gut (grün)
             if self.eco2 > 2000:
                 return 0  # Rot
