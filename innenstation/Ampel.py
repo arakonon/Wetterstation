@@ -4,11 +4,12 @@ from checkQuality import checkQuality
 from Buzzer import Buzzer
 
 class Ampel:
-    def __init__(self, bmee):
+    def __init__(self, bmee, accQual=-1):
+        self.accQual = accQual
         # Sensor-Objekt speichern (z.B. BME680)
         self.bme = bmee
         # Alarm-Objekt zur Bewertung der Luftqualität erzeugen
-        self.alarm = checkQuality(bmee)
+        self.alarm = checkQuality(bmee, accQual=accQual)
         # Buzzer-Objekt für akustische Signale
         self.buzzer = Buzzer()
         # RGB-LED initialisieren (GPIO-Pins: Rot=5, Grün=26, Blau=6)
